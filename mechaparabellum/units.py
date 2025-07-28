@@ -1,7 +1,5 @@
 import enum
 
-import stringcase
-
 """
     18: {1},
     26: {1},
@@ -13,10 +11,14 @@ import stringcase
     1: {1}
 
 """
-class Unit(enum.IntEnum):
+class NamedEnum(enum.IntEnum):
+    def __str__(self):
+        return self.name.replace('_', ' ').title()
+
+class Unit(NamedEnum):
     # 0 + 100 :
     CRAWLER = 10
-    MARKSMAN = 2  # ???
+    MARKSMAN = 2
     HOUND = 28
     VOID_EYE = 30
     ARCLIGHT = 15
@@ -43,13 +45,11 @@ class Unit(enum.IntEnum):
     # 200 + 500: Overlord
     # 200 + 800: War Factory, Mountain
     ABYSS = 29
-    # 200 drops: Fire Badger, Typhoon
+    # 200 drops:
+    TYPHOON = 22
     FIRE_BADGER = 20
 
-    def __str__(self):
-        return self.name.replace('_', ' ').title()
-
-class Reinforcements(enum.IntEnum):
+class Reinforcement(NamedEnum):
     # Units = 10.XRUU, where X is amount, R is rank and UU is unit ID . is probably price?
     # 0000 in string format = spell
     # Unit modifiers = 3UU??
@@ -74,8 +74,7 @@ class Reinforcements(enum.IntEnum):
     ABSORPTION_MODULE = 1309001 # 150
 
 
-class TowerTechs(enum.IntEnum):
-    # MASS_RECRUITMENT = 1100001
+class TowerTechs(NamedEnum):
     RAPID_RESUPPLY = 1
     HIGH_MOBILITY = 2  # ?
     MASS_RECRUITMENT = 3
@@ -83,11 +82,11 @@ class TowerTechs(enum.IntEnum):
     ENHANCED_RANGE = 5
 
 
-class Specialist(enum.IntEnum):
+class Specialist(NamedEnum):
     TRAINING = 9894  # Arclights and Sabretooths
     RHINO = 9878  # Crawlers and StormCallers
 
-class UnitTech(enum.IntEnum):
+class UnitTech(NamedEnum):
     # Range = 102 + UID
     FIRE_BADGER_RANGE = 10220
     PHANTOM_RAY_RANGE = 10225
@@ -97,14 +96,30 @@ class UnitTech(enum.IntEnum):
     MUSTANG_ANTI_MISSILE = 3307
     SABER_RANGE = 10221
 
-class CommanderSkill(enum.IntEnum):
+    # Mustang / 3307
+    ANTI_MISSILE = 33
+    # Fire badger / 10220, Mustang / 10207, Sniper / 10202, Sabertooth / 10221, Phantom Ray / 10225
+    RANGE = 102
+    # Rhino / ..05
+    WRECKAGE_RECYCLING = 23
+    POWER_ARMOR = 25
+    FINAL_BLITZ = 28
+    # Phantom ray / ...25
+    OIL_BOMB = 110
+
+class CommanderSkill(NamedEnum):
     INTENSIVE_TRAINING = 1100001
     FIELD_RECOVERY = 900001
     STICKY_OIL = 400002
+    MOBILE_BEACON = 1500002
+    MASS_RECRUITMENT = 1100001
 
-class BluePrint(enum.IntEnum):
+class BluePrint(NamedEnum):
     STICKY_OIL = 1
     FIELD_RECOVERY = 2
     MOBILE_BEACON = 3  # ?
     ATTACK_ENHANCEMENT = 4
     DEFENCE_ENHANCEMENT = 5
+
+class Contraption(NamedEnum):
+    SHIELD_GENERATOR = 20001
