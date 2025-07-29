@@ -13,6 +13,17 @@ import enum
 
 """
 
+CONFIRMED_UNIT_REINFORCEMENTS_FOR_1V1_AND_2V2 = {101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112}
+CONFIRMED_UNIT_REINFORCEMENTS_FOR_BRAWL = {202, 205, 208}
+CONFIRMED_UNIT_REINFORCEMENTS_FOR_SURVIVAL = {302, 303, 304, 305, 306, 307, 308, 309, 310}
+
+CONFIRMED_UNIT_REINFORCEMENTS = (
+    CONFIRMED_UNIT_REINFORCEMENTS_FOR_1V1_AND_2V2
+    | CONFIRMED_UNIT_REINFORCEMENTS_FOR_BRAWL
+    | CONFIRMED_UNIT_REINFORCEMENTS_FOR_SURVIVAL
+)
+
+DEDUCED_UNIT_REINFORCEMENTS = {201, 203, 204, 206, 207, 209, 210, 212}
 
 class NamedEnum(enum.IntEnum):
     def __str__(self):
@@ -39,6 +50,7 @@ class Unit(NamedEnum):
     HACKER = 14
     ARCLIGHT = 15
     PHOENIX = 16
+    WAR_FACTORY = 17
     WRAITH = 18
     SCORPION = 19
     FIRE_BADGER = 20
@@ -220,7 +232,10 @@ class Reinforcement(NamedEnum):
         try:
             return cls(int(id_))
         except ValueError:
-            if len(id_) == 5:
+            first_three_digits = int(id_[:3])
+            if first_three_digits == 130:
+                return Item(int(id_))
+            elif id_[0] == '3' and len(id_) == 5:
                 unit = Unit(int(id_[1:3]))
                 raise ValueError(f'[red]Unknown Unit buff {id_} for {unit}[/red]')
             elif '0000' in id_ or id_ == '1200013':
@@ -228,46 +243,14 @@ class Reinforcement(NamedEnum):
                     return CommanderSkill(int(id_))
                 except ValueError:
                     return f'{id_} is an unknown battlefield power.'
+            elif first_three_digits in CONFIRMED_UNIT_REINFORCEMENTS:
+                rank = int(id_[4])
+                amount = int(id_[3])
+                assert amount, id_  # This is important!
+                unit = Unit(int(id_[5:]))
+                return f'{amount} x Rank {rank} {unit}'
             else:
-                match int(id_[:3]):
-                    # 3xx happens as reinforcement #2 in Brawl
-                    # 2xx is in survival
-                    # support for those is very much experimental.
-                    case (
-                        101
-                        | 102
-                        | 103
-                        | 104
-                        | 105
-                        | 106
-                        | 107
-                        | 108
-                        | 109
-                        | 110
-                        | 111
-                        | 112
-                        | 202
-                        | 205
-                        | 208
-                        | 302
-                        | 303
-                        | 304
-                        | 305
-                        | 306
-                        | 307
-                        | 308
-                        | 309
-                        | 310
-                    ):  # ?
-                        rank = int(id_[4])
-                        amount = int(id_[3])
-                        assert amount, id_  # This is important!
-                        unit = Unit(int(id_[5:]))
-                        return f'{amount} x Rank {rank} {unit}'
-                    case 130:
-                        return Item(int(id_))
-                    case _:
-                        raise ValueError(f'Unknown reinforcement id: {id_}')
+                raise ValueError(f'Unknown reinforcement id: {id_}')
 
 
 class TowerTech(NamedEnum):
@@ -457,7 +440,10 @@ class UnitTech(NamedEnum):
 
 
 class CommanderSkill(NamedEnum):
-    # 120 == Summon
+    # 30000x == Damage (?)
+    # 90000x == Unit "change" (?)
+    # x00002 == Ground effect (?)
+    # 120 == Summon, except electromagnetic blast ...
     ACID_BLAST = 500002
     CAN_RECRUIT_RANK_5_CRAWLER = 1200004  # ?
     ELECTROMAGNETIC_BLAST_0 = 200002
