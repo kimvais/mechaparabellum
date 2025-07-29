@@ -24,7 +24,7 @@ class Unit(NamedEnum):
     HOUND = 28
     VOID_EYE = 30
     ARCLIGHT = 15
-    FANG = 9  # ?!?
+    FANG = 9
     # 0 + 200
     SLEDGEHAMMER = 13
     STEEL_BALL = 8
@@ -38,11 +38,13 @@ class Unit(NamedEnum):
     PHOENIX = 16
     PHANTOM_RAY = 25
     # 100 + 200: Hacker
+    HACKER = 14
     # 50 + 300: Wraith, Scorpion, Farseer
     FARSEER = 26
     WRAITH = 18
     # The following must be 1, 3, 14, 17, 19, 23, 26, and 27
     # 200 + 400: Vulcan, Sandworm, Raiden
+    VULCAN = 3
     RAIDEN = 27
     FORTRESS = 1
     SANDWORM = 23
@@ -51,6 +53,7 @@ class Unit(NamedEnum):
     OVERLORD = 11
     # 200 + 800: War Factory, Mountain
     ABYSS = 29
+    WAR_FACTORY = 17
     # 200 drops:
     TYPHOON = 22
     FIRE_BADGER = 20
@@ -63,8 +66,11 @@ class Item(NamedEnum):
     IMPROVED_FIREPOWER_CONTROL_SYSTEM = 13030003  # ???
     LASER_SIGHTS = 13030001
     NANO_REPAIR_KIT = 13020001
+    PORTABLE_SHIELD = 13010001
     SMALL_AMPLIFYING_CORE = 13030009
     STEEL_BALL_PRODUCTION_LINE = 1306003
+    SUPER_HEAVY_ARMOR = 13030006
+    DEPLOYMENT_MODULE = 13040001  # ???
 
 class Reinforcement(NamedEnum):
     # Units = 10.XRUU, where X is amount, R is rank and UU is unit ID . is probably price?
@@ -73,24 +79,31 @@ class Reinforcement(NamedEnum):
     # Items = 130+
     ADDITIONAL_DEPLOYMENT_SLOT = 10004
     ADVANDED_DEFENSIVE_TACTICS = 20001
+    ASSAULT_FANG = 30902
     ASSAULT_STORMCALLER = 31201  #  Free
+    EFFICIENT_LIGHT_MANUFACTURING = 20023
     EFFICIENT_TECH_RESEARCH = 20003
     ELITE_CRAWLER = 31002
     ELITE_HACKER = 31403
+    ELITE_MUSTANG = 30703
+    ELITE_PHOENIX = 31604
+    EXTENDED_RANGE_PHOENIX = 31602
+    EXTENDED_RANGE_SLEDGEHAMMER = 31302
+    FORTIFIED_HACKED = 31402
     FORTIFIED_OVERLORD = 31101
     EXTENDED_RANGE_SABERTOOTH = 32101
     IMPROVED_MELTING_POINT = 30402 #
     MASS_PRODUCED_SLEDGEHAMMER = 31301   # Free
     MASS_PRODUCED_RHINO = 30501
-    ORBITAL_BOMBARDMENT = 300003
     QUICK_COOLDOWN = 10001
     QUICK_TELEPORT = 10009
     SUBSIDIZED_CRAWLER = 31001
+    SUBSIDIZED_MARKSMAN = 30203
     SUBSIDIZED_STEEL_BALL = 30801
     SUPER_SUPPLY_ENHANCEMENT = 10003
     VULCANS_DESCENT = 1200005
     WASP_SWARM_MAYBE = 13030001 # This is false.
-    XXX = 20006
+    ADVANCED_TARGETING_SYSTEM = 20006
 
     @classmethod
     def parse(cls, id_: str):
@@ -128,14 +141,17 @@ class TowerTech(NamedEnum):
 
 
 class Specialist(NamedEnum):
-    TRAINING = 9894
+    TRAINING = 9894 # 9876
     RHINO = 9878
     AMPLIFY = 9897  # And 9884?
-    FORTIFIED = 9896
+    FORTIFIED = 9896  # 9890
     TYPHOON = 9871  # 9875
     MARKSMAN = 9876
-    COST_CONTROL = 9879  # Typhoon?!
+    COST_CONTROL = 9879  # Typhoon?!, # 9891, 9889
     SABERTOOTH = 9893
+    QUICK_SUPPLY = 9877
+    ELITE = 9884
+    FIRE_BADGER = 9889  # See COST_CONTROL!
 
 
 
@@ -145,8 +161,11 @@ class Tower(NamedEnum):
 
 
 class UnitTech(NamedEnum):
+    ARMOR_ENHANCEMENT = 9
     # Mustang / 3307
     ANTI_MISSILE = 33
+    # Fang / 10609
+    ARMOR_PIERCING_BULLETS = 106
     # Fire badger / 10220, Mustang / 10207, Sniper / 10202, Sabertooth / 10221, Phantom Ray / 10225
     RANGE = 102
     # Rhino / ..05
@@ -157,7 +176,7 @@ class UnitTech(NamedEnum):
     OIL_BOMB = 110
     # Steel Ball / 2408, 1308
     FORTIFIED_TARGET_LOCK = 24
-    MECHANICAL_DIVISION = 13
+    MECHANICAL_DIVISION_TO_CRAWLERS = 13
     # Mustang / 3207
     AERIAL_SPECIALIZATION = 32
     # Fortress / 1105
@@ -183,10 +202,27 @@ class UnitTech(NamedEnum):
     SUBTERRANEAN_BLITZ = 26
     # Melting Point / 304
     ENERGY_ABSORPTION = 3
+    # Fang / 209
+    PORTABLE_SHIELD = 2
+    # Wasp / 1606
+    JUMP_DRIVE = 16
+    # Sandworm / 13023
+    MECHANICAL_DIVISION_TO_LARVAES = 130
+    # War factory / 12117, 12017
+    PHOENIX_PRODUCTION = 120
+    STEEL_BALL_PRODUCTION = 121
+    # Marksman / 10802
+    ELITE_MARKSMAN = 108
+    # Vulcan / 1203
+    BEST_PARTNER = 12
+
 
     @classmethod
     def parse(cls, id_: str):
         match id_:
+            case '3003':  # !?
+                tech = cls.ARMOR_ENHANCEMENT
+                unit = Unit.VULCAN
             case '1105':
                 tech = cls.ANTI_AIR_BARRAGE
                 unit = Unit.FORTRESS
@@ -205,18 +241,24 @@ class UnitTech(NamedEnum):
 
         return tech, unit
 
+
 class CommanderSkill(NamedEnum):
-    INTENSIVE_TRAINING = 1100001
-    FIELD_RECOVERY = 900001
-    STICKY_OIL = 400002
-    MOBILE_BEACON = 1500002
-    MASS_RECRUITMENT = 1100001
-    ELECTROMAGNETIC_IMPACT = 200001
-    SHIELD_AIRDROP = 800001
     ACID_BLAST = 500002
+    ELECTROMAGNETIC_BLAST = 200002
+    ELECTROMAGNETIC_IMPACT = 200001
+    FIELD_RECOVERY = 900001
+    INCENDIARY_BOMB = 100002
+    INTENSIVE_TRAINING = 1100001
+    ION_BLAST = 300006  # ?!
+    MASS_RECRUITMENT = 1100001
+    MOBILE_BEACON = 1500002
+    ORBITAL_BOMBARDMENT = 300003
     PHOTON_EMISSION = 200003
-    XXX = 300006
+    SHIELD_AIRDROP = 800001
+    STICKY_OIL = 400002
     XXX_SHIELD_AIRDROP = 1000001 # ?!
+    XXX_INTENSIVE_TRAINING = 1200001 # ?!
+
 
 class BluePrint(NamedEnum):
     STICKY_OIL = 1

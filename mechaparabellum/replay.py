@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import fire
 from lxml import etree
@@ -62,7 +63,8 @@ class CLI:
         root = load(path)
         player_record = find_correct_pr(root.find('playerRecords'))
         for round in player_record.find('playerRoundRecords'):
-            print(f'\n\n --- Round: {round.find("round").text}')
+            round_no = round.find("round").text
+            print(f'\n\n --- Round: {round_no}')
             unlocked_units = round.xpath('playerData/shop/unlockedUnits/int')
             actions = round.xpath('actionRecords/MatchActionData')
             for unit in unlocked_units:
@@ -145,7 +147,8 @@ class CLI:
                     print(to_str(action))
                 except ValueError:
                     print(to_str(action))
-                    raise
+                    print(f'{path.stem} on round # {round_no}')
+                    sys.exit(1)
 
     def parse_all(self):
         for path in DIR.glob('*.grbr'):
