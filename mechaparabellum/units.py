@@ -37,13 +37,13 @@ class Unit(NamedEnum):
     RHINO = 5
     PHOENIX = 16
     PHANTOM_RAY = 25
-    # 100 + 200: Hacker
+    # 100 + 200:
     HACKER = 14
-    # 50 + 300: Wraith, Scorpion, Farseer
+    # 50 + 300:
     FARSEER = 26
     WRAITH = 18
-    # The following must be 1, 3, 14, 17, 19, 23, 26, and 27
-    # 200 + 400: Vulcan, Sandworm, Raiden
+    SCORPION = 19
+    # 200 + 400:
     VULCAN = 3
     RAIDEN = 27
     FORTRESS = 1
@@ -51,7 +51,7 @@ class Unit(NamedEnum):
     MELTING_POINT = 4
     # 200 + 500:
     OVERLORD = 11
-    # 200 + 800: War Factory, Mountain
+    # 200 + 800: Mountain
     ABYSS = 29
     WAR_FACTORY = 17
     # 200 drops:
@@ -61,15 +61,19 @@ class Unit(NamedEnum):
 class Item(NamedEnum):
     ABSORPTION_MODULE = 1309001 # 150
     AMPLIFYING_CORE = 13030007 # 150
+    ENHANCEMENT_MODULE = 13030004
     HASTE_MODULE = 13030005
     HEAVY_ARMOR = 13030002
     IMPROVED_FIREPOWER_CONTROL_SYSTEM = 13030003  # ???
     LASER_SIGHTS = 13030001
     NANO_REPAIR_KIT = 13020001
+    MUSTANG_PRODUCTION_LINE = 1306002
+    PHOTON_COATING = 1305003
     PORTABLE_SHIELD = 13010001
     SMALL_AMPLIFYING_CORE = 13030009
     STEEL_BALL_PRODUCTION_LINE = 1306003
     SUPER_HEAVY_ARMOR = 13030006
+    TANK_PRODUCTION_LINE = 1306001
     DEPLOYMENT_MODULE = 13040001  # ???
 
 class Reinforcement(NamedEnum):
@@ -77,31 +81,43 @@ class Reinforcement(NamedEnum):
     # 0000 in string format = spell
     # Unit modifiers = 3UU??
     # Items = 130+
+    _SKIP = 0
     ADDITIONAL_DEPLOYMENT_SLOT = 10004
     ADVANDED_DEFENSIVE_TACTICS = 20001
     ASSAULT_FANG = 30902
+    ASSAULT_MELTING_POINT = 30401
+    ASSAULT_SCORPION = 31901
     ASSAULT_STORMCALLER = 31201  #  Free
     EFFICIENT_LIGHT_MANUFACTURING = 20023
     EFFICIENT_TECH_RESEARCH = 20003
     ELITE_CRAWLER = 31002
+    ELITE_FANG = 30901
     ELITE_HACKER = 31403
     ELITE_MUSTANG = 30703
     ELITE_PHOENIX = 31604
+    EXTENDED_RANGE_PHANTOM_RAY = 32501
     EXTENDED_RANGE_PHOENIX = 31602
     EXTENDED_RANGE_SLEDGEHAMMER = 31302
+    EXTENDED_RANGE_STORMCALLER = 31202
     FORTIFIED_HACKED = 31402
     FORTIFIED_OVERLORD = 31101
     EXTENDED_RANGE_SABERTOOTH = 32101
     IMPROVED_MELTING_POINT = 30402 #
-    MASS_PRODUCED_SLEDGEHAMMER = 31301   # Free
+    IMPROVED_OVERLORD = 31104
     MASS_PRODUCED_RHINO = 30501
+    MASS_PRODUCED_SCORPION = 31902
+    MASS_PRODUCED_SLEDGEHAMMER = 31301   # Free
+    MASS_PRODUCED_WASP = 30601
+    MASS_PRODUCED_WRAITH = 31801
     QUICK_COOLDOWN = 10001
     QUICK_TELEPORT = 10009
+    SMART_MARKSMAN = 30202
     SUBSIDIZED_CRAWLER = 31001
     SUBSIDIZED_MARKSMAN = 30203
     SUBSIDIZED_STEEL_BALL = 30801
+    SUBSIDIZED_STORMCALLER = 31203
     SUPER_SUPPLY_ENHANCEMENT = 10003
-    VULCANS_DESCENT = 1200005
+    SUPPLY_ENHANCEMENT = 20007
     WASP_SWARM_MAYBE = 13030001 # This is false.
     ADVANCED_TARGETING_SYSTEM = 20006
 
@@ -112,10 +128,10 @@ class Reinforcement(NamedEnum):
         except ValueError:
             if len(id_) == 5:
                 unit = Unit(int(id_[1:3]))
-                return f'Unknown Unit buff {id_} for {unit}'
+                raise ValueError(f'[red]Unknown Unit buff {id_} for {unit}[/red]')
             else:
                 match int(id_[:3]):
-                    case 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109:  # ?
+                    case 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 112:  # ?
                         rank = int(id_[4])
                         amount = int(id_[3])
                         unit = Unit(int(id_[5:]))
@@ -142,17 +158,17 @@ class TowerTech(NamedEnum):
 
 class Specialist(NamedEnum):
     TRAINING = 9894 # 9876
-    RHINO = 9878
+    RHINO = 9899 #, 9878 (?)
     AMPLIFY = 9897  # And 9884?
     FORTIFIED = 9896  # 9890
-    TYPHOON = 9871  # 9875
-    MARKSMAN = 9876
-    COST_CONTROL = 9879  # Typhoon?!, # 9891, 9889
+    GIANT = 9892 # also marksman
+    TYPHOON = 9891  # 9871,  9875, 9873, 9878(?)
+    MARKSMAN = 9892 #, 9876 - also Giant
+    COST_CONTROL = 9889 #, 9879  # Typhoon?!, # 9891, 9889
     SABERTOOTH = 9893
-    QUICK_SUPPLY = 9877
+    QUICK_SUPPLY = 9885 #, 9877, 9900
     ELITE = 9884
-    FIRE_BADGER = 9889  # See COST_CONTROL!
-
+    FIRE_BADGER = 9884 #, 9889 - See COST_CONTROL!
 
 
 class Tower(NamedEnum):
@@ -215,7 +231,20 @@ class UnitTech(NamedEnum):
     ELITE_MARKSMAN = 108
     # Vulcan / 1203
     BEST_PARTNER = 12
-
+    # Fire Badger / 820
+    NAPALM = 8
+    # Sabertooth / 721
+    DOUBLE_SHOT = 7
+    # Wasp / 506
+    GROUND_SPECIALIZATION = 5
+    # Farseer / 180526
+    SCANNING_RADAR = 1805
+    # Scorpion / 10019
+    SIEGE_MODE = 100
+    # Raiden / 4027
+    CHAIN = 40
+    # Abyss / 110291 -- wtf is that trailing 1
+    SWARM_MISSILES = 110291
 
     @classmethod
     def parse(cls, id_: str):
@@ -235,6 +264,9 @@ class UnitTech(NamedEnum):
             case '1107':
                 tech = cls.ENERGY_DIFFRACTION
                 unit = Unit.MELTING_POINT
+            case '110291':
+                tech = cls.SWARM_MISSILES
+                unit = Unit.ABYSS
             case _:
                 tech = cls(int(id_[:-2]))
                 unit = Unit(int(id_[-2:]))
@@ -244,20 +276,28 @@ class UnitTech(NamedEnum):
 
 class CommanderSkill(NamedEnum):
     ACID_BLAST = 500002
-    ELECTROMAGNETIC_BLAST = 200002
+    ELECTROMAGNETIC_BLAST_0 = 200002
+    ELECTROMAGNETIC_BLAST_1 = 1200002
     ELECTROMAGNETIC_IMPACT = 200001
     FIELD_RECOVERY = 900001
     INCENDIARY_BOMB = 100002
     INTENSIVE_TRAINING = 1100001
     ION_BLAST = 300006  # ?!
-    MASS_RECRUITMENT = 1100001
-    MOBILE_BEACON = 1500002
+    LIGHTNING_STORM = 300005
+    MISSILE_STRIKE = 300001
+    MOBILE_BEACON = 1500002  # From Drop?
+    MOBILE_BEACON_FROM_TOWER = 1500001
     ORBITAL_BOMBARDMENT = 300003
+    ORBITAL_JAVELIN = 300007
     PHOTON_EMISSION = 200003
+    RHINO_DROP = 1200006
     SHIELD_AIRDROP = 800001
+    SMOKE_BOMB = 600002
     STICKY_OIL = 400002
+    UNDERGROUND_THREAT = 1200001
+    VULCANS_DESCENT = 1200005
+    WASP_SWARM = 1200003
     XXX_SHIELD_AIRDROP = 1000001 # ?!
-    XXX_INTENSIVE_TRAINING = 1200001 # ?!
 
 
 class BluePrint(NamedEnum):
