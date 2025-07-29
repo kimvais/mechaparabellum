@@ -130,6 +130,7 @@ class Reinforcement(NamedEnum):
     EXTENDED_RANGE_STORMCALLER = 31202
     EXTENDED_RANGE_VULCAN = 30301
     EXTENDED_RANGE_WAR_FACTORY = 31701
+    FORTIFIED_ARCLIGHT = 31503
     FORTIFIED_HACKER = 31402
     FORTIFIED_MUSTANG = 30702
     FORTIFIED_OVERLORD = 31101
@@ -141,6 +142,7 @@ class Reinforcement(NamedEnum):
     IMPROVED_SANDWORM = 32301
     IMPROVED_SCORPION = 31903
     IMPROVED_SLEDGEHAMMER = 31304
+    IMPROVED_STEEL_BALL = 30803
     IMPROVED_TARANTULA = 32401
     IMRPOVED_WAR_FACTORY = 31702
     IMPROVED_WASP = 30602
@@ -232,9 +234,10 @@ class Tower(NamedEnum):
 
 class UnitTech(NamedEnum):
     # 12, 120 and 121 (..and 122 etc?) are all summons.
+    HIGH_EXPLOSIVE_AMMO = 4
     ENHANCED_CONTROL = 17  # Hacker / 1714
     DAMAGE_SHARING = 6  # Sledgehamer / 613
-    ARMOR_ENHANCEMENT = 9
+    FIELD_MAINTENANCE = 9
     # Mustang / 3307
     ANTI_MISSILE = 33
     # Mountain / 342002
@@ -254,14 +257,20 @@ class UnitTech(NamedEnum):
     # Steel Ball / 2408, 1308
     FORTIFIED_TARGET_LOCK = 24
     MECHANICAL_DIVISION_TO_CRAWLERS = 13
+    # Tarantula / 3124
+    ANTI_AIRCRAFT_AMMUNITION = 31
     # Mustang / 3207
     AERIAL_SPECIALIZATION = 32
+    # Sandworm / 3723
+    SANDSTORM = 37
+    # Void Eye / 4430
+    AERIAL_MODE = 44
     # Fortress / 1105
     ANTI_AIR_BARRAGE = 11
     # Fortress / 1001
     BARRIER = 10
     # Sabretooth / 10321
-    FIELD_MAINTENANCE = 103
+    FIELD_MAINTENANCE_SABRE = 103
     # Farseer / 1826, Marksman 1802
     EMP = 18
     # Typhoon / 3022
@@ -315,6 +324,8 @@ class UnitTech(NamedEnum):
     ROCKET_PUNCH = 1102
     # Melting point / 1106
     ELECTROMAGNETIC_BARRAGE = 1106
+    # Overlord / 1108
+    OVERLORD_ARTILLERY = 1108
     # Rhino / 1109
     WHIRLWIND = 1109
     # Crawler / 180110
@@ -331,6 +342,8 @@ class UnitTech(NamedEnum):
     SUPPRESSION_SHOTS = 1804
     # Abyss / 110291 -- wtf is that trailing 1
     SWARM_MISSILES = 110291
+    # Sabertooth / 110211
+    SECONDARY_ARMAMENT = 110211
     INVALID = -1
 
 
@@ -349,12 +362,17 @@ class UnitTech(NamedEnum):
             case '905':
                 tech = cls.FIELD_MAINTENANCE
                 unit = Unit.RHINO
+            case '921':
+                raise ValueError(id_)
             case '1106':
                 tech = cls.ELECTROMAGNETIC_BARRAGE
                 unit = Unit.MELTING_POINT
             case '1107':
                 tech = cls.ENERGY_DIFFRACTION
                 unit = Unit.MELTING_POINT
+            case '1108':
+                tech = cls.OVERLORD_ARTILLERY
+                unit = Unit.OVERLORD
             case '1109':
                 tech = cls.WHIRLWIND
                 unit = Unit.RHINO
@@ -370,6 +388,9 @@ class UnitTech(NamedEnum):
             case '110181':
                 tech = cls.FLOATING_ARTILLERY_ARRAY
                 unit = Unit.WRAITH
+            case '110211':
+                tech = cls.SECONDARY_ARMAMENT
+                unit = Unit.SABERTOOTH
             case '110291':
                 tech = cls.SWARM_MISSILES
                 unit = Unit.ABYSS
@@ -382,7 +403,7 @@ class UnitTech(NamedEnum):
             case '1202001':
                 tech = cls.STEEL_BALL_PRODUCTION
                 unit = Unit.DEATH_KNELL
-            case '11020022':
+            case '11020022' | '10102':   # 10102 dubious.
                 tech = cls.INVALID
                 unit = Unit.DEPRECATED
             case _:
