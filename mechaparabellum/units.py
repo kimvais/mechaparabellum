@@ -64,6 +64,7 @@ class Unit(NamedEnum):
 class Item(NamedEnum):
     ABSORPTION_MODULE = 1309001 # 150
     AMPLIFYING_CORE = 13030007 # 150
+    BARRIER = 1307001
     ENHANCEMENT_MODULE = 13030004
     HASTE_MODULE = 13030005
     HEAVY_ARMOR = 13030002
@@ -81,48 +82,72 @@ class Item(NamedEnum):
 
 class Reinforcement(NamedEnum):
     # Units = 1[01].XRUU, where X is amount, R is rank and UU is unit ID . is probably price?
-    # also, 302... is in brawl
+    # 3xx in Brawl
+    # 2xx in Survival
     # 0000 in string format = spell
     # Unit modifiers = 3UU??
     # Items = 130+
     _SKIP = 0
     ADDITIONAL_DEPLOYMENT_SLOT = 10004
     ADVANDED_DEFENSIVE_TACTICS = 20001
+    ADVANCED_OFFENSIVE_TACTICS = 20002
+    ADVANCED_SHIELD_DEVICE = 10007
     ASSAULT_FANG = 30902
+    ASSAULT_FORTRESS = 30102
     ASSAULT_MELTING_POINT = 30401
     ASSAULT_SCORPION = 31901
     ASSAULT_STORMCALLER = 31201  #  Free
+    BERSERK_RHINO = 30502
+    EFFICIENG_GIANT_MANUFACTURING = 20022
     EFFICIENT_LIGHT_MANUFACTURING = 20023
     EFFICIENT_TECH_RESEARCH = 20003
     ELITE_CRAWLER = 31002
     ELITE_FANG = 30901
     ELITE_HACKER = 31403
+    ELITE_MARKSMAN = 30204
     ELITE_MUSTANG = 30703
     ELITE_PHOENIX = 31604
+    ELITE_STORMCALLER = 31205
+    ELITE_TARANTULA = 32402
+    EXTENDED_RANGE_FORTRESS = 30105
+    EXTENDED_RANGE_MARKSMAN = 30201
     EXTENDED_RANGE_PHANTOM_RAY = 32501
     EXTENDED_RANGE_PHOENIX = 31602
     EXTENDED_RANGE_SLEDGEHAMMER = 31302
     EXTENDED_RANGE_STORMCALLER = 31202
-    FORTIFIED_HACKED = 31402
+    FORTIFIED_HACKER = 31402
+    FORTIFIED_MUSTANG = 30702
     FORTIFIED_OVERLORD = 31101
     EXTENDED_RANGE_SABERTOOTH = 32101
     IMPROVED_MELTING_POINT = 30402 #
     IMPROVED_OVERLORD = 31104
+    IMRPOVED_PHOENIX = 31603
+    IMPROVED_SABERTOOTH = 32103
+    IMPROVED_SANDWORM = 32301
+    IMPROVED_SCORPION = 31903
+    IMPROVED_SLEDGEHAMMER = 31304
+    IMRPOVED_WAR_FACTORY = 31702
+    MASS_PRODUCED_MELTING_POINT = 30403
+    MASS_PRODUCED_OVERLORD = 31102
+    MASS_PRODUCED_PHOENIX = 31601
     MASS_PRODUCED_RHINO = 30501
+    MASS_PRODUCED_SABERTOOTH = 32102
     MASS_PRODUCED_SCORPION = 31902
     MASS_PRODUCED_SLEDGEHAMMER = 31301   # Free
     MASS_PRODUCED_WASP = 30601
     MASS_PRODUCED_WRAITH = 31801
     QUICK_COOLDOWN = 10001
     QUICK_TELEPORT = 10009
+    SMART_ARCLIGHT = 31502
     SMART_MARKSMAN = 30202
     SUBSIDIZED_CRAWLER = 31001
     SUBSIDIZED_MARKSMAN = 30203
+    SUBSIDIZED_MUSTANG = 30701
     SUBSIDIZED_STEEL_BALL = 30801
     SUBSIDIZED_STORMCALLER = 31203
     SUPER_SUPPLY_ENHANCEMENT = 10003
     SUPPLY_ENHANCEMENT = 20007
-    WASP_SWARM_MAYBE = 13030001 # This is false.
+    # WASP_SWARM_MAYBE = 13030001 # This is false.
     ADVANCED_TARGETING_SYSTEM = 20006
 
     @classmethod
@@ -140,8 +165,10 @@ class Reinforcement(NamedEnum):
                         return f'{id_} is an unknown battlefield power.'
             else:
                 match int(id_[:3]):
-                    # 30x happen only as reinforcement #2 in Brawl - these are very much experimental.
-                    case 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 112 | 302 | 303 | 304 | 305 | 306 | 307 | 308: # ?
+                    # 3xx happens as reinforcement #2 in Brawl
+                    # 2xx is in survival
+                    # support for those is very much experimental.
+                    case 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 111 | 112 | 202 | 205 | 302 | 303 | 304 | 305 | 306 | 307 | 308 | 309 | 310: # ?
                         rank = int(id_[4])
                         amount = int(id_[3])
                         assert amount, id_   # This is important!
@@ -182,10 +209,15 @@ class Tower(NamedEnum):
 
 
 class UnitTech(NamedEnum):
+    # 12, 120 and 121 (..and 122 etc?) are all summons.
     ENHANCED_CONTROL = 17  # Hacker / 1714
     ARMOR_ENHANCEMENT = 9
     # Mustang / 3307
     ANTI_MISSILE = 33
+    # Mountain / 342002
+    EFFICIENT_MAINTENANCE = 34
+    # Phantom Ray / 3925
+    STEALTH_CLOAK = 39
     # Fang / 10609
     ARMOR_PIERCING_BULLETS = 106
     # Fire badger / 10220, Mustang / 10207, Sniper / 10202, Sabertooth / 10221, Phantom Ray / 10225
@@ -232,12 +264,15 @@ class UnitTech(NamedEnum):
     JUMP_DRIVE = 16
     # Sandworm / 13023
     MECHANICAL_DIVISION_TO_LARVAES = 130
-    # War factory / 12117, 12017
+    # War factory / 12017
     PHOENIX_PRODUCTION = 120
+    # Death knell / 1202001, War Factory / 12117
     STEEL_BALL_PRODUCTION = 121
+    # War factory / 12217
+    SLEDGEHAMMER_PRODUCTION = 122
     # Marksman / 10802
     ELITE_MARKSMAN = 108
-    # Vulcan / 1203
+    # Vulcan / 1203, Overlord / 1112
     BEST_PARTNER = 12
     # Fire Badger / 820
     NAPALM = 8
@@ -251,9 +286,20 @@ class UnitTech(NamedEnum):
     SIEGE_MODE = 100
     # Raiden / 4027
     CHAIN = 40
+    # Fortress / 110201
+    ROCKET_PUNCH = 1102
+    # Crawler / 180110
+    REPLICATE = 1801
+    # Vulcan / 11010
+    STICKY_OIL_BOMB = 11010
+    # Wraith / 110118
+    FLOATING_ARTILLERY_ARRAY = 110181
+    # Overlord / 180311
+    PHOTON_EMISSION = 1803
+    # Void Eye / 180430
+    SUPPRESSION_SHOTS = 1804
     # Abyss / 110291 -- wtf is that trailing 1
     SWARM_MISSILES = 110291
-    # Death knell / 1202001 = Steel ball production
 
 
     @classmethod
@@ -277,9 +323,15 @@ class UnitTech(NamedEnum):
             case '1204':
                 tech = cls.CRAWLER_PRODUCTION
                 unit = Unit.MELTING_POINT
+            case '11010':
+                tech = cls.STICKY_OIL_BOMB
+                unit = Unit.VULCAN
             case '32001':  # Death knell techs shared with Melting Point
                 tech = cls(int(id_[:-4]))
                 unit = Unit.DEATH_KNELL
+            case '110181':
+                tech = cls.FLOATING_ARTILLERY_ARRAY
+                unit = Unit.WRAITH
             case '110291':
                 tech = cls.SWARM_MISSILES
                 unit = Unit.ABYSS
@@ -293,9 +345,13 @@ class UnitTech(NamedEnum):
                 tech = cls.STEEL_BALL_PRODUCTION
                 unit = Unit.DEATH_KNELL
             case _:
-                tech = cls(int(id_[:-2]))
-                unit = Unit(int(id_[-2:]))
-        assert chosen_unit == unit
+                if len(id_) > 4 and id_.endswith(('2001', '2002')):
+                    unit_id_len = 4
+                else:
+                    unit_id_len = 2
+                tech = cls(int(id_[:-unit_id_len]))
+                unit = Unit(int(id_[-unit_id_len:]))
+        assert chosen_unit == unit, id_
         return tech, unit
 
 
@@ -314,6 +370,7 @@ class CommanderSkill(NamedEnum):
     MOBILE_BEACON = 1500002  # From Drop?
     MOBILE_BEACON_BRAWL = 1000002
     MOBILE_BEACON_FROM_TOWER = 1500001
+    NUKE = 300004
     ORBITAL_BOMBARDMENT = 300003
     ORBITAL_JAVELIN = 300007
     PHOTON_EMISSION = 200003
