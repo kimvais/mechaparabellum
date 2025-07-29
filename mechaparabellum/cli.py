@@ -8,6 +8,7 @@ from packaging.version import InvalidVersion, \
     Version
 
 from rich.console import Console
+import rich.table
 import fire
 import requests
 
@@ -45,7 +46,7 @@ class CLI:
                 json.dump(res.json(), f, ensure_ascii=False, indent=4)
             # self.console.print(data)
 
-    def analyze(self):
+    def analyze(self, rows=20):
         wins = Counter()
         names = defaultdict(set)
         files = DATA_DIR.glob('recommended_*.json')
@@ -64,24 +65,27 @@ class CLI:
                     key = tuple(Counter(units).items())
                     names[key].add(formation['name'])
                     wins[key] += int(n)
-        for form, win_count in wins.most_common(10):
-            players = names[form]
-            # self.console.print(form, players)
+        table = rich.table.Table(title='Wins')
+        table.add_column('Rank', justify='center')
+        table.add_column('Wins', justify='center')
+        table.add_column('Players', justify='center')
+        table.add_column()
+        table.add_column()
+        table.add_column()
+        for rank, (form, win_count) in enumerate(wins.most_common(rows), 1):
+            # players = names[form]
+            def _inner():
+                yield f'#{rank:d}'
+                yield str(win_count)
+                yield str(len(names[form]))
+                for unit, n in sorted(form, key=itemgetter(1), reverse = True):
+                    yield(f'{str(n)} * {Unit(unit)}')
+            table.add_row(*_inner())
 
 
-        self.console.print(wins.most_common(10))
-        for k, v in names.items():
-            if 'NTAGT' in v and (2, 2) in k:
-                print(k, v)
-        print(names[((2, 2), (28, 3), (12, 2))])
-        alls = set()
-        for key in wins.keys():
-            alls |= set(key)
-        unit_numbers = defaultdict(set)
-        for id_, count in sorted(alls, key=itemgetter(1), reverse=True):
-            unit_numbers[id_].add(count)
-        self.console.print(unit_numbers)
-        self.console.print(sorted(unit_numbers.keys()))
+        self.console.print(table)
+
+
 
 
 if __name__ == '__main__':
