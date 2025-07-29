@@ -87,7 +87,7 @@ class CLI:
                         case 'PAD_UpgradeTechnology':
                             unit = get_unit(action)
                             tech, teched_unit  = UnitTech.parse(action.find('TechID').text, unit)
-                            assert unit == teched_unit, (tech, unit, to_str(action))
+                            assert teched_unit in {Unit.DEPRECATED, unit}, (tech, unit, to_str(action))
                             self.console.print(f'Upgrade technology: {unit} {unit.value} - {tech} {tech.value}')
                         case 'PAD_ActiveEnergyTowerSkill':
                             skill = TowerTech(int(action.find('SkillID').text))
@@ -146,6 +146,8 @@ class CLI:
                             skill_id = int(action.find('ID').text)
                             skill = CommanderSkill(skill_id)
                             self.console.print(f'Cancel release commander skill {skill}')
+                        case 'PAD_TestCommand':
+                            self.console.print('[red]TESTING GROUNDS ARE NOT SUPPORTED[/red]')
                         case _:
                             self.console.print(to_str(action))
                             raise Exception(f'Unknown action: {action}')
