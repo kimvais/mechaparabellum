@@ -1,11 +1,9 @@
 import pathlib
 import re
 import json
-from collections import Counter, \
-    defaultdict
+from collections import Counter, defaultdict
 from operator import itemgetter
-from packaging.version import InvalidVersion, \
-    Version
+from packaging.version import InvalidVersion, Version
 
 from rich.console import Console
 import rich.table
@@ -21,7 +19,7 @@ GAME_START_RE = re.compile(r'^\[C] recv message \[\d+] - \[ResponseEnterStage]\n
 CURRENT_MAJOR = Version('1.6')
 DATA_DIR = pathlib.Path(__file__).parent / 'data'
 TEST_PATH = pathlib.Path(r'c:\users\k\p\mechaparabellum\tests\mecha.txt')
-LOG_DIRECTORY = pathlib.Path(r"C:\Program Files (x86)\steam\steamapps\common\Mechabellum\ProjectDatas\Log\\")
+LOG_DIRECTORY = pathlib.Path(r'C:\Program Files (x86)\steam\steamapps\common\Mechabellum\ProjectDatas\Log\\')
 
 
 class CLI:
@@ -90,13 +88,15 @@ class CLI:
         for form, winrate in sorted(win_rates.items(), key=itemgetter(1), reverse=True):
             if (popularity := popularities[form]) < 0.01:
                 continue
+
             def _inner():
                 yield f'#{rank:d}'
                 yield f'{winrate:.1%}'
                 yield f'{popularity:.1%}'
-                for unit, n in sorted(form, key=itemgetter(1), reverse = True):
+                for unit, n in sorted(form, key=itemgetter(1), reverse=True):
                     best_starting_units[unit] += win_count
-                    yield(f'{str(n)} * {Unit(unit)}')
+                    yield (f'{str(n)} * {Unit(unit)}')
+
             table.add_row(*_inner())
             rank += 1
             if rank > rows:
@@ -113,11 +113,5 @@ class CLI:
         self.console.print(table)
 
 
-
-
-
-
-
 if __name__ == '__main__':
     fire.Fire(CLI)
-

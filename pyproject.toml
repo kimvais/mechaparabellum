@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling",]
 build-backend = "hatchling.build"
 
 [project]
@@ -13,5 +13,13 @@ dependencies = [
     "notebook>=7.4.4",
     "packaging>=25.0",
     "rich",
+    "ruff",
     "stringcase>=1.2.0",
+    "uv",
 ]
+
+[tool.ruff]
+line-length = 119
+
+[tool.ruff.format]
+quote-style = "single"

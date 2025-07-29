@@ -9,14 +9,16 @@ import tempfile
 
 from rich.console import Console
 
-from mechaparabellum.units import CommanderSkill, \
-    Contraption, \
-    Item, \
-    Reinforcement, \
-    Tower, \
-    TowerTech, \
-    Unit, \
-    UnitTech
+from mechaparabellum.units import (
+    CommanderSkill,
+    Contraption,
+    Item,
+    Reinforcement,
+    Tower,
+    TowerTech,
+    Unit,
+    UnitTech,
+)
 from mechaparabellum.utils import modification_time
 
 
@@ -24,17 +26,18 @@ DIR = pathlib.Path('C:/Program Files (x86)/Steam/steamapps/common/Mechabellum/Pr
 OUT_DIR = pathlib.Path('c:/Users/k/p/mechaparabellum/replays')
 STATIC = 0x151
 DATE_END = 0x166
-XML_START = 0x18a
+XML_START = 0x18A
 START_TAG = b'<BattleRecord xmlns'
 END_TAG = b'</BattleRecord>'
 
 PLAYER = 'Kimvais'
 
+
 def load(path):
     data = path.read_bytes()
     xml_start = data.find(START_TAG)
     xml_end = data.find(END_TAG)
-    xml = data[xml_start:xml_end+len(END_TAG)].decode('utf-8')
+    xml = data[xml_start : xml_end + len(END_TAG)].decode('utf-8')
     _, fn = tempfile.mkstemp('.xml', text=True)
     xml_path = pathlib.Path(fn)
     xml_path.write_text(xml)
@@ -42,8 +45,10 @@ def load(path):
     # xml_path.unlink()
     return tree.getroot()
 
+
 def to_str(elem):
     return ET.tostring(elem).decode('utf-8')
+
 
 def find_correct_pr(prs):
     for pr in prs:
@@ -54,9 +59,11 @@ def find_correct_pr(prs):
         if name.text == PLAYER:
             return pr
 
+
 def get_unit(action):
     uid = action.find('UID').text
     return Unit(int(uid))
+
 
 class CLI:
     def __init__(self):
@@ -70,7 +77,7 @@ class CLI:
         if player_record is None:
             return
         for round in player_record.find('playerRoundRecords'):
-            round_no = round.find("round").text
+            round_no = round.find('round').text
             self.console.print(f'\n\n --- Round: {round_no}')
             unlocked_units = round.xpath('playerData/shop/unlockedUnits/int')
             actions = round.xpath('actionRecords/MatchActionData')
@@ -86,8 +93,12 @@ class CLI:
                             self.console.print(f'Choose starting setup: #{idx}: {uid}')
                         case 'PAD_UpgradeTechnology':
                             unit = get_unit(action)
-                            tech, teched_unit  = UnitTech.parse(action.find('TechID').text, unit)
-                            assert teched_unit in {Unit.DEPRECATED, unit}, (tech, unit, to_str(action))
+                            tech, teched_unit = UnitTech.parse(action.find('TechID').text, unit)
+                            assert teched_unit in {Unit.DEPRECATED, unit}, (
+                                tech,
+                                unit,
+                                to_str(action),
+                            )
                             self.console.print(f'Upgrade technology: {unit} {unit.value} - {tech} {tech.value}')
                         case 'PAD_ActiveEnergyTowerSkill':
                             skill = TowerTech(int(action.find('SkillID').text))
@@ -164,7 +175,6 @@ class CLI:
         for n, path in enumerate(sorted(DIR.glob('*.grbr'), key=modification_time, reverse=True), 1):
             self.console.print(f'Parsing #{n} {path.name}')
             self.parse(path)
-
 
 
 if __name__ == '__main__':
