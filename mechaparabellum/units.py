@@ -51,12 +51,15 @@ class Unit(NamedEnum):
     MELTING_POINT = 4
     # 200 + 500:
     OVERLORD = 11
-    # 200 + 800: Mountain
+    # 200 + 800:
     ABYSS = 29
     WAR_FACTORY = 17
+    MOUNTAIN = 2002
     # 200 drops:
     TYPHOON = 22
     FIRE_BADGER = 20
+    # Brawl drops
+    DEATH_KNELL = 2001
 
 class Item(NamedEnum):
     ABSORPTION_MODULE = 1309001 # 150
@@ -77,7 +80,8 @@ class Item(NamedEnum):
     DEPLOYMENT_MODULE = 13040001  # ???
 
 class Reinforcement(NamedEnum):
-    # Units = 10.XRUU, where X is amount, R is rank and UU is unit ID . is probably price?
+    # Units = 1[01].XRUU, where X is amount, R is rank and UU is unit ID . is probably price?
+    # also, 302... is in brawl
     # 0000 in string format = spell
     # Unit modifiers = 3UU??
     # Items = 130+
@@ -129,23 +133,24 @@ class Reinforcement(NamedEnum):
             if len(id_) == 5:
                 unit = Unit(int(id_[1:3]))
                 raise ValueError(f'[red]Unknown Unit buff {id_} for {unit}[/red]')
+            elif '0000' in id_ or id_ == '1200013':
+                    try:
+                        return CommanderSkill(int(id_))
+                    except ValueError:
+                        return f'{id_} is an unknown battlefield power.'
             else:
                 match int(id_[:3]):
-                    case 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 112:  # ?
+                    # 30x happen only as reinforcement #2 in Brawl - these are very much experimental.
+                    case 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 112 | 302 | 303 | 304 | 305 | 306 | 307 | 308: # ?
                         rank = int(id_[4])
                         amount = int(id_[3])
+                        assert amount, id_   # This is important!
                         unit = Unit(int(id_[5:]))
                         return f'{amount} x Rank {rank} {unit}'
                     case 130:
                         return Item(int(id_))
                     case _:
-                        if '0000' in id_:
-                            try:
-                                return CommanderSkill(int(id_))
-                            except ValueError:
-                                return f'{id_} is an unknown battlefield power.'
-                        else:
-                            raise ValueError(f'Unknown reinforcement id: {id_}')
+                        raise ValueError(f'Unknown reinforcement id: {id_}')
 
 
 class TowerTech(NamedEnum):
@@ -177,6 +182,7 @@ class Tower(NamedEnum):
 
 
 class UnitTech(NamedEnum):
+    ENHANCED_CONTROL = 17  # Hacker / 1714
     ARMOR_ENHANCEMENT = 9
     # Mustang / 3307
     ANTI_MISSILE = 33
@@ -189,7 +195,7 @@ class UnitTech(NamedEnum):
     POWER_ARMOR = 25
     FINAL_BLITZ = 28
     # Phantom ray / 11025
-    OIL_BOMB = 110
+    OIL_BOMB = 110  # 110 is Energy Diffraction for Melting Pot and Death Knell, but the Unit ID is 7 in former case :O
     # Steel Ball / 2408, 1308
     FORTIFIED_TARGET_LOCK = 24
     MECHANICAL_DIVISION_TO_CRAWLERS = 13
@@ -209,6 +215,8 @@ class UnitTech(NamedEnum):
     MECHANICAL_RAGE_CRAWLER = 105
     # Melting point / 1107 (Sic!)
     ENERGY_DIFFRACTION = 1107
+    # Melting point / 1204
+    CRAWLER_PRODUCTION = 1204
     # Phoenix / 2916
     QUANTUM_REASSEMBLY = 29
     # Hound / 4228
@@ -245,9 +253,11 @@ class UnitTech(NamedEnum):
     CHAIN = 40
     # Abyss / 110291 -- wtf is that trailing 1
     SWARM_MISSILES = 110291
+    # Death knell / 1202001 = Steel ball production
+
 
     @classmethod
-    def parse(cls, id_: str):
+    def parse(cls, id_: str, chosen_unit):
         match id_:
             case '3003':  # !?
                 tech = cls.ARMOR_ENHANCEMENT
@@ -264,13 +274,28 @@ class UnitTech(NamedEnum):
             case '1107':
                 tech = cls.ENERGY_DIFFRACTION
                 unit = Unit.MELTING_POINT
+            case '1204':
+                tech = cls.CRAWLER_PRODUCTION
+                unit = Unit.MELTING_POINT
+            case '32001':  # Death knell techs shared with Melting Point
+                tech = cls(int(id_[:-4]))
+                unit = Unit.DEATH_KNELL
             case '110291':
                 tech = cls.SWARM_MISSILES
                 unit = Unit.ABYSS
+            case '1022001' | '1022002':  # Range for ;ountain and Death Knell
+                tech = cls.RANGE
+                unit = Unit(int(id_[-4:]))
+            case '1102001':
+                tech = cls.ENERGY_DIFFRACTION
+                unit = Unit.DEATH_KNELL
+            case '1202001':
+                tech = cls.STEEL_BALL_PRODUCTION
+                unit = Unit.DEATH_KNELL
             case _:
                 tech = cls(int(id_[:-2]))
                 unit = Unit(int(id_[-2:]))
-
+        assert chosen_unit == unit
         return tech, unit
 
 
@@ -284,12 +309,15 @@ class CommanderSkill(NamedEnum):
     INTENSIVE_TRAINING = 1100001
     ION_BLAST = 300006  # ?!
     LIGHTNING_STORM = 300005
+    MELTING_POINTS_DESCENT = 1200013
     MISSILE_STRIKE = 300001
     MOBILE_BEACON = 1500002  # From Drop?
+    MOBILE_BEACON_BRAWL = 1000002
     MOBILE_BEACON_FROM_TOWER = 1500001
     ORBITAL_BOMBARDMENT = 300003
     ORBITAL_JAVELIN = 300007
     PHOTON_EMISSION = 200003
+    REDEPLOYMENT = 900003  # Brawl innate only?
     RHINO_DROP = 1200006
     SHIELD_AIRDROP = 800001
     SMOKE_BOMB = 600002

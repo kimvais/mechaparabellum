@@ -86,9 +86,9 @@ class CLI:
                             self.console.print(f'Choose starting setup: #{idx}: {uid}')
                         case 'PAD_UpgradeTechnology':
                             unit = get_unit(action)
-                            tech, teched_unit  = UnitTech.parse(action.find('TechID').text)
+                            tech, teched_unit  = UnitTech.parse(action.find('TechID').text, unit)
                             assert unit == teched_unit, (tech, unit, to_str(action))
-                            self.console.print(f'Upgrade technology: {unit} - {tech}')
+                            self.console.print(f'Upgrade technology: {unit} {unit.value} - {tech} {tech.value}')
                         case 'PAD_ActiveEnergyTowerSkill':
                             skill = TowerTech(int(action.find('SkillID').text))
                             self.console.print(f'Active energy tower skill: {skill}')
