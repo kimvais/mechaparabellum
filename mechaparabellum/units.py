@@ -265,22 +265,36 @@ class TowerTech(NamedEnum):
 
 class Specialist(NamedEnum):
     """
-    XXX: This is garbage, need to figure what the actual pick starting squad numbers mean!
     """
 
-    TRAINING = 9894  # 9876
-    RHINO = 9899  # , 9878 (?)
-    AMPLIFY = 9897  # And 9884?
-    FORTIFIED = 9896  # 9890
-    GIANT = 9892  # also marksman
-    TYPHOON = 9891  # 9871,  9875, 9873, 9878(?)
-    MARKSMAN = 9892  # , 9876 - also Giant
-    COST_CONTROL = 9889  # , 9879  # Typhoon?!, # 9891, 9889
-    SABERTOOTH = 9893
-    QUICK_SUPPLY = 9885  # , 9877, 9900
-    ELITE = 9884
-    FIRE_BADGER = 9884  # , 9889 - See COST_CONTROL!
+    _NONE = -1
+    SUPPLY = 10002
+    QUICK_SUPPLY = 10010
+    MISSILE = 10011
+    AMPLIFY = 10013
+    TRAINING = 10014
+    _SURVIVAL_PLAYER = 20003
+    GIANT = 20005
+    AERIAL = 20021
+    SPEED = 20024
+    MARKSMAN = 20029
+    ELITE = 20032
+    RHINO = 20033
+    COST_CONTROL = 20034
+    FORTIFIED = 20035
+    SABERTOOTH = 20036
+    FARSEER = 20037  # Not in game in version 1706.
+    FIRE_BADGER = 20038
+    TYPHOON = 20039
+    _SURVIVAL_TEAMMATE = 31603
 
+    def __str__(self):
+        if self.name.startswith('_'):
+            return "None"
+        else:
+            return f'{self.name.replace("_", " ").title()} Specialist'
+
+    __rich__ = __str__
 
 class Tower(NamedEnum):
     RESEARCH_CENTER = 0

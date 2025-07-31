@@ -1,3 +1,6 @@
+import enum
+import logging
+import math
 import pathlib
 import re
 import json
@@ -16,11 +19,22 @@ from mechaparabellum.units import Unit
 NUMBER_OF_FORMATION_FILES = 10
 
 GAME_START_RE = re.compile(r'^\[C] recv message \[\d+] - \[ResponseEnterStage]\n^(?P<json>.+)$', re.MULTILINE)
+LOG_SAVE_RE = re.compile(r'^.C. save binary success : (?P<path>.*)$', re.MULTILINE)
 CURRENT_MAJOR = Version('1.6')
 DATA_DIR = pathlib.Path(__file__).parent / 'data'
 TEST_PATH = pathlib.Path(r'c:\users\k\p\mechaparabellum\tests\mecha.txt')
 LOG_DIRECTORY = pathlib.Path(r'C:\Program Files (x86)\steam\steamapps\common\Mechabellum\ProjectDatas\Log\\')
+# [Info][00:57:48 2025/07/30 +03:00] recv message [-1192] - [PushAddFpHistory]^M
+# [{ "record": { "time": 1753826266, "eloPoint": -13, "mapId": 2021, "season": 4, "lobby": { "players": [ { "userid": "281474976710805718", "riskInfo": { "name": "JabaMaya", "faceUrl": "https://avatars.steamstatic.com/6a1f82166bffee647a9764f3f94cd6b26064b0d6_full.jpg", "blockName": { "1": false, "2": false, "3": false }, "blockFace": { "1": false, "2": false, "3": false } }, "index": 1 }, { "userid": "281474976710764850", "riskInfo": { "name": "Μ.Ξ.Ğ.Λ.Τ.Ř.Ø.Ņ.", "faceUrl": "https://avatars.steamstatic.com/f31c25ab959fc993b93f92bd2abcb80f4e482c82_full.jpg", "blockName": { "1": false, "2": false, "3": false }, "blockFace": { "1": false, "2": false, "3": false } } }, { "userid": "281474976711266755", "riskInfo": { "name": "Kalmere", "faceUrl": "https://avatars.steamstatic.com/fdd8590c4e2fb20011a0e762f3868729bffa8be2_full.jpg", "blockName": { "1": false, "2": false, "3": false }, "blockFace": { "1": false, "2": false, "3": false } }, "index": 2 } ], "win": -1, "index": 3 } } }]
+GAME_RESULT_RE = re.compile(r'^\[Info]\[.*] recv message \[-?\d+] - \[PushAddFpHistory]\n^(?P<json>.+)$', re.MULTILINE)
 
+logger = logging.getLogger(__name__)
+
+
+class Result(enum.IntEnum):
+    LOSS = -1
+    UNKNOWN = 0
+    WIN = 1
 
 class CLI:
     def __init__(self):
@@ -28,13 +42,27 @@ class CLI:
 
     def test(self):
         log_files = LOG_DIRECTORY.rglob('?Auto*.txt')
-        newest = get_newest(log_files)
-        print(newest.lstat())
-        log = newest.read_text()
-        for re_match in GAME_START_RE.finditer(log):
-            print(re_match)
-            match_data = json.loads(re_match.group('json'))
-        self.console.print(match_data)
+        for log_file in log_files:
+            text = log_file.read_text()
+            for result_match, save_match in zip(GAME_RESULT_RE.finditer(text), LOG_SAVE_RE.finditer(text)):
+                path = save_match.group('path')
+                match_data = json.loads(result_match.group('json'))
+                results = match_data[0]['record']
+                mrr_change = results.get('eloPoint', 0)
+                try:
+                    outcome = Result(results['lobby']['win'])
+                except KeyError:
+                    outcome = Result(math.copysign(1, mrr_change) if mrr_change else 0)
+                self.console.print(outcome.name, mrr_change, path)
+
+    def test2(self):
+        log_files = LOG_DIRECTORY.rglob('?Auto*.txt')
+        for log_file in log_files:
+            logger.debug(str(log_file.stem))
+            text = log_file.read_text()
+            print(text.count('save binary success'))
+            for m in LOG_SAVE_RE.finditer(text):
+                self.console.print(m.group('path'))
 
     def download(self):
         for i in range(NUMBER_OF_FORMATION_FILES):
@@ -114,4 +142,5 @@ class CLI:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     fire.Fire(CLI)

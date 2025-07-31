@@ -1,3 +1,5 @@
+import dataclasses
+import enum
 import logging
 import sys
 
@@ -14,6 +16,7 @@ from mechaparabellum.units import (
     Contraption,
     Item,
     Reinforcement,
+    Specialist,
     Tower,
     TowerTech,
     Unit,
@@ -31,6 +34,8 @@ START_TAG = b'<BattleRecord xmlns'
 END_TAG = b'</BattleRecord>'
 
 PLAYER = 'Kimvais'
+
+logger = logging.getLogger(__name__)
 
 
 def load(path):
@@ -64,6 +69,20 @@ def get_unit(action):
     uid = action.find('UID').text
     return Unit(int(uid))
 
+class MatchMode(enum.Enum):
+    _1V1 = 'VS_1_1'
+    _2V2 = 'VS_2_2'
+    BRAWL = 'VS_4_Scuffle'
+
+    def __str__(self):
+        return self.name.lstrip('_'.title())
+    __rich__ = __str__
+
+@dataclasses.dataclass
+class BattleInfo:
+    id_: str
+    game_mode: str
+    match_mode: MatchMode
 
 class CLI:
     def __init__(self):
@@ -73,13 +92,103 @@ class CLI:
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
         root = load(path)
-        player_record = find_correct_pr(root.find('playerRecords'))
+
+        # Root parsing
+        version = root.find('Version').text
+        seat = int(root.find('Seat').text)
+
+        # Battle info parsing
+        battle_info= root.find('BattleInfo')
+        battle = BattleInfo(
+        id_ = battle_info.find('BattleID').text,
+        game_mode = battle_info.find('GameMode').text,
+        match_mode = MatchMode(battle_info.find('MatchMode').text),
+        )
+        self.console.print(dataclasses.asdict(battle))
+        # Player record parsing
+        player_records = root.find('playerRecords')
+        self.console.print(f'Battle ID: {battle.id_} on {version}, seat {seat}')
+        for index, pr in enumerate(player_records[:4]):  # This skips bots in brawl
+            round_list = pr.find('playerRoundRecords').getchildren()
+            if not round_list:
+                logger.error(f'No rounds found!')
+                continue
+            name = pr.find('name').text
+            try:
+                specialist_id = int(round_list[-1].xpath('playerData/officers')[0].find('int').text)
+            except AttributeError:
+                specialist_id = -1
+            try:
+                specialist = Specialist(specialist_id)
+            except ValueError:
+                self.console.print(f'Unknown specialist for "{name}": {specialist_id}')
+                sys.exit(1)
+
+            self.console.print(f'Player #{index}: {name}: {specialist}')
+
+        player_record = player_records.getchildren()[seat]
+        player_name = player_record.find('name').text
+        assert player_name == PLAYER
+        # reinforceItems
+        # Version
+        # Seat
+        # BattleInfo:
+        # StartTime 0
+        # SystemSeed ###
+        # BattleID ###-###
+        # PrepareTime 30
+        # DeployTime 100
+        # FightTime 120 / 200 (1v1 / 2v2)
+        # MapID 2011
+        # MaxRound 40
+        # BlueprintIncreaseSupply 0
+        # EnableAdvanceTeam "true" (Ganks?)
+        # EnableReinforcement "true" (Drops?)
+        # GameMode "Normal" / "Competition" (Tournament?)
+        # MatchMode "VS_2_2" / "VS_1_1" / "VS_4_Scuffle"
+        # ScoreMode "ReduceScore"
+        # HostID 0
+        # CloseUnitReinforce "false"
+        # SurviveModeDifficulty "VeryEasy"
+        match_datas = root.xpath('matchDatas/MatchSnapshotData')  # a list, per round
+        # poolOPs/ValueTupleOfInt32Int32 - drop choices Item1 0, Item2 ID
+        # lastFightResult/Reports: a list, per player
+        # FightReport:
+        # Contraptions/ContraptionData
+        # unitData/NewUnitData[]: id, Index, RoundCount, Durability (survival?), Exp, Level
+        # Score
+        # DeadScore
+        # DestroydCrystalCount
+        # AliveMechCount
         if player_record is None:
             return
-        for round in player_record.find('playerRoundRecords'):
+        # /data
+        # - reactorCore, MacReactorCore, maxRoundSypply, firstRoundSupply, roundSupplyIncreaseValue, team, isLeader
+        # - style (just skin data), unitDatas[]/unitData:
+        #   - id, techs[]/tech[data]
+        round_records = player_record.find('playerRoundRecords')
+        for round in round_records:
             round_no = round.find('round').text
             self.console.print(f'\n\n --- Round: {round_no}')
             unlocked_units = round.xpath('playerData/shop/unlockedUnits/int')
+            hp = round.xpath('playerData/reactorCore')
+            supply = round.xpath('playerData/supply')
+            units = round.xpath('playerData/units')
+            # ... NewUnitData : id, Index, RoundCount, Exp, Level, Position/x, Position/y, EquipmentID, IsRotate, SellSupply
+            specialist = round.xpath('playerData/officers[0]')
+            unit_count = round.xpath('playerData/unitIndex')
+            # playerData:
+            # preRoundFightResult "Lose" / "Win"
+            # commanderSkills
+            # activeTechnologies
+            # equipments
+            # shop/BuyCount, shop/MaxUnlockCount, shop/UnlockCount
+            # contraptions
+            # blueprints
+            # energyTowerSkills
+            # towerStrengthLevels 0,1
+            # isSpecialSupply (bool)
+
             actions = round.xpath('actionRecords/MatchActionData')
             for unit in unlocked_units:
                 self.console.print(f' Available: {Unit(int(unit.text))}')
@@ -178,4 +287,5 @@ class CLI:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     fire.Fire(CLI)
