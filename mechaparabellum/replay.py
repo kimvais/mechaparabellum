@@ -126,9 +126,14 @@ class CLI:
 
             self.console.print(f'Player #{index}: {name}: {specialist}')
 
-        player_record = player_records.getchildren()[seat]
-        player_name = player_record.find('name').text
-        assert player_name == PLAYER
+        try:
+            player_record = player_records.getchildren()[seat]
+        except IndexError:
+            self.console.print(f'Seat {seat} out of range, player is a spectator!')
+            return
+        else:
+            player_name = player_record.find('name').text
+            assert player_name == PLAYER
         # reinforceItems
         # Version
         # Seat
@@ -160,8 +165,6 @@ class CLI:
         # DeadScore
         # DestroydCrystalCount
         # AliveMechCount
-        if player_record is None:
-            return
         # /data
         # - reactorCore, MacReactorCore, maxRoundSypply, firstRoundSupply, roundSupplyIncreaseValue, team, isLeader
         # - style (just skin data), unitDatas[]/unitData:
