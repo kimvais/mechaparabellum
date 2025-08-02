@@ -185,8 +185,6 @@ class CLI:
 
     def _parse_round(self, player, round):
         round_no = int(round.find('round').text)
-        if round_no == 1:
-            self._debug_data[self._debug_data['team']] = []
         unlocked_units = round.xpath('playerData/shop/unlockedUnits/int')
         hp = round.xpath('playerData/reactorCore')
         supply = round.xpath('playerData/supply')
@@ -207,8 +205,6 @@ class CLI:
         # isSpecialSupply (bool)
         for unit in unlocked_units:
             unit = Unit(int(unit.text))
-            if round_no == 1:
-                self._debug_data[self._debug_data['team']].append(unit)
         actions = list(self._parse_actions(round.xpath('actionRecords/MatchActionData')))
         try:
             if isinstance(actions[0], ChooseAdvanceTeam):

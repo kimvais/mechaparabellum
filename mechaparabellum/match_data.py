@@ -5,6 +5,25 @@ from mechaparabellum.actions import Action
 from mechaparabellum.units import Specialist, \
     Unit
 
+"""
+Coordinate system:
+
+- Origin is at the middle of the no-man's land.
+- All coordinates are for the center point.
+- Flanks are 60m wide, ranging in x from -360 to -300 and 300 to 360 
+- Main battlefield is 600m wide, ranging in x from -300 to 300
+- The battlefield is 620m tall, ranging from -10 to -320 (player's side, top top bottom)
+- There is a 20m wide tall no-mans land in the middle, ranging from 10 to -10
+- Flanks range in y from 310 to 10 (top to bottom)
+
++-------------------------+
+|(-300, -10)    (300, -10)|  
+|                         |
+|                         |
+|(-300, -310)  (300, -310)|
++-------------------------+
+"""
+
 @dataclasses.dataclass
 class Player:
     id_: int
