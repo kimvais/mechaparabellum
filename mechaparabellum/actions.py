@@ -1,7 +1,8 @@
 import abc
 import dataclasses
 
-from mechaparabellum.units import CommanderSkill, Contraption, Item, Reinforcement, Tower, TowerTech, Unit, UnitTech
+from mechaparabellum.units import CommanderSkill, Contraption, Item, Reinforcement, Tower, TowerTech, Unit, UnitTech, \
+    starting_units
 from mechaparabellum.utils import get_unit, to_str
 
 actions = {}
@@ -35,12 +36,14 @@ class _UnitAction(Action):
 class ChooseAdvanceTeam(Action):
     uid: int
     index: int
+    units: tuple[Unit]
 
     @classmethod
     def parse(cls, elem):
-        uid = elem.find('ID').text
-        index = elem.find('Index').text
-        yield cls(uid, index)
+        uid = int(elem.find('ID').text)
+        index = int(elem.find('Index').text)
+        units = starting_units[uid]
+        yield cls(uid, index, units)
 
     def __str__(self):
         return f'Choose starting setup: #{self.index}: {self.uid}'

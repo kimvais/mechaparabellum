@@ -10,7 +10,8 @@ import tempfile
 
 from rich.console import Console
 
-from mechaparabellum.actions import actions
+from mechaparabellum.actions import ChooseAdvanceTeam, \
+    actions
 from mechaparabellum.units import (
     CommanderSkill,
     Contraption,
@@ -85,9 +86,11 @@ class BattleInfo:
 
 
 class CLI:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
         self.console = Console()
         self.buffer = []
+        self._debug_data = {}
 
     def output(self, msg):
         self.buffer.append(msg)
@@ -177,10 +180,13 @@ class CLI:
         round_records = player_record.find('playerRoundRecords')
         for round in round_records:
             for action in self._parse_round(path, round):
-                self.output(action)
+                if self.debug:
+                    self.output(action)
 
     def _parse_round(self, path, round):
-        round_no = round.find('round').text
+        round_no = int(round.find('round').text)
+        if round_no == 1:
+            self._debug_data[self._debug_data['team']] = []
         self.output(f'\n\n --- Round: {round_no}')
         unlocked_units = round.xpath('playerData/shop/unlockedUnits/int')
         hp = round.xpath('playerData/reactorCore')
@@ -201,8 +207,12 @@ class CLI:
         # towerStrengthLevels 0,1
         # isSpecialSupply (bool)
         actions = round.xpath('actionRecords/MatchActionData')
+        self.output('Available units:')
         for unit in unlocked_units:
-            self.output(f' Available: {Unit(int(unit.text))}')
+            unit = Unit(int(unit.text))
+            if round_no == 1:
+                self._debug_data[self._debug_data['team']].append(unit)
+            self.output(f' - {unit}')
         for action in actions:
             try:
                 yield from self._parse_action(action)
@@ -222,12 +232,18 @@ class CLI:
         except KeyError:
             self.output(to_str(xml_action_elem))
             raise Exception(f'Unknown action: {xml_action_elem}')
-        yield from cls.parse(xml_action_elem)
+
+        actions_ = cls.parse(xml_action_elem)
+        if cls == ChooseAdvanceTeam:
+            actions_ = list(actions_)
+            self._debug_data['team'] = actions_[0].uid
+        yield from actions_
 
     def parse_all(self):
         for n, path in enumerate(sorted(DIR.glob('*.grbr'), key=modification_time, reverse=True), 1):
             self.output(f'Parsing #{n} {path.name}')
             self.parse(path)
+        self.output(self._debug_data)
 
 
 if __name__ == '__main__':

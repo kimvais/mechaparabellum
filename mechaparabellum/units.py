@@ -504,3 +504,31 @@ class Contraption(NamedEnum):
     SHIELD_GENERATOR = 10001
     SENTRY_MISSILE = 20001  # ?
     MISSILE_INTERCEPTOR = 30001  # ?
+
+starting_units = {
+    9902: (Unit.SABERTOOTH, Unit.HOUND),
+    9894: (Unit.SABERTOOTH, Unit.ARCLIGHT),
+    9871: (Unit.MARKSMAN, Unit.SLEDGEHAMMER),
+    9893: (Unit.SABERTOOTH, Unit.FANG),
+    9897: (Unit.HOUND, Unit.STEEL_BALL),
+    9889: (Unit.TARANTULA, Unit.MARKSMAN),
+    9873: (Unit.MUSTANG, Unit.CRAWLER),
+    9874: (Unit.STEEL_BALL, Unit.FANG),
+    9900: (Unit.VOID_EYE, Unit.MUSTANG),
+    9877: (Unit.FANG, Unit.SLEDGEHAMMER),
+    9891: (Unit.TARANTULA, Unit.CRAWLER),
+    9883: (Unit.ARCLIGHT, Unit.STEEL_BALL),
+    9885: (Unit.ARCLIGHT, Unit.SLEDGEHAMMER),
+    9876: (Unit.FANG, Unit.STORMCALLER),
+    9875: (Unit.STEEL_BALL, Unit.CRAWLER),
+    9899: (Unit.VOID_EYE, Unit.SLEDGEHAMMER),
+    9896: (Unit.HOUND, Unit.MUSTANG),
+    9892: (Unit.SABERTOOTH, Unit.CRAWLER),
+    9901: (Unit.VOID_EYE, Unit.TARANTULA),
+    9884: (Unit.ARCLIGHT, Unit.STORMCALLER),
+    9878: (Unit.CRAWLER, Unit.STORMCALLER),
+    9879: (Unit.CRAWLER, Unit.SLEDGEHAMMER),
+    9890: (Unit.TARANTULA, Unit.FANG),
+    9898: (Unit.HOUND, Unit.STORMCALLER),
+    9895: (Unit.HOUND, Unit.SLEDGEHAMMER)
+}
