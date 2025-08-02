@@ -1,7 +1,7 @@
 import abc
 import dataclasses
 
-from mechaparabellum.units import CommanderSkill, Contraption, Item, Reinforcement, Tower, TowerTech, Unit, UnitTech, \
+from mechaparabellum.units import CommanderSkill, Contraption, Item, Reinforcement, Tower, TowerTech, Unit, Tech, \
     starting_units
 from mechaparabellum.utils import get_unit, to_str
 
@@ -60,19 +60,18 @@ class ChooseAdvanceTeam(Action):
 
 @action_dataclass
 class UpgradeTechnology(Action):
-    unit: Unit
-    tech: UnitTech
+    tech: Tech
 
     @classmethod
     def parse(cls, elem):
         unit = get_unit(elem)
-        tech, teched_unit = UnitTech.parse(elem.find('TechID').text, unit)
-        assert teched_unit in {Unit.DEPRECATED, unit}, (
+        tech = Tech.parse(elem.find('TechID').text, unit)
+        assert tech.unit in {Unit.DEPRECATED, unit}, (
             tech,
             unit,
             to_str(elem),
         )
-        yield cls(unit, tech)
+        yield cls(tech)
 
     def __str__(self):
         return f'Upgrade technology: {self.unit} ({self.unit.value}) - {self.tech} ({self.tech.value})'

@@ -1,3 +1,5 @@
+from __future__ import annotations
+import dataclasses
 import enum
 
 
@@ -311,9 +313,9 @@ class UnitTech(NamedEnum):
     HIGH_EXPLOSIVE_AMMO = 4
     GROUND_SPECIALIZATION = 5  # Wasp / 506
     DAMAGE_SHARING = 6  # Sledgehamer / 613
-    DOUBLE_SHOT = 7  # Sabertooth / 721
-    NAPALM = 8  # Fire Badger / 820
-    FIELD_MAINTENANCE = 9
+    DOUBLE_SHOT = 7  # Sabertooth / 721, "Burst mode" on Farseer / 726a. "Saturation bombardment" on Mountain / 72002
+    NAPALM = 8  # Fire Badger / 820, Also "Incendiary bomb" for Stormcaller / 812
+    FIELD_MAINTENANCE = 9  # "Burrow maintenance" on Sandworm / 923
     BARRIER = 10  # Fortress / 1001
     ANTI_AIR_BARRAGE = 11  # Fortress / 1105
     # All 12* summon something.
@@ -341,15 +343,15 @@ class UnitTech(NamedEnum):
     # 27 ???
     FINAL_BLITZ = 28  # Rhino / 2808
     QUANTUM_REASSEMBLY = 29  # Phoenix / 2916
-    MECHANICAL_RAGE_TYPHOON = 30  # Typhoon / 3022
+    ARMOR_ENHANCEMENT = 30
     ANTI_AIRCRAFT_AMMUNITION = 31  # Tarantula / 3124
     AERIAL_SPECIALIZATION = 32  # Mustang / 3207
     ANTI_MISSILE = 33  # Mustang / 3307
     EFFICIENT_MAINTENANCE = 34  # Mountain / 342002
-    # 35 ???
+    LOOSE_FORMATION = 35  # Crawler / 3510
     # 36 ???
     SANDSTORM = 37  # Sandworm / 3723
-    # 38 ???
+    STRIKE = 38  # Sandworm / 3823
     STEALTH_CLOAK = 39  # Phantom Ray / 3925
     CHAIN = 40  # Raiden / 4027
     # 41 ???
@@ -362,10 +364,10 @@ class UnitTech(NamedEnum):
     FIELD_MAINTENANCE_SABER = 103  # Sabertooth / 10321
     # 104 ???
     MECHANICAL_RAGE_CRAWLER = 105  # Crawler / 10510
-    ARMOR_PIERCING_BULLETS = 106  # Fang / 10609
+    ARMOR_PIERCING_BULLETS_OR_SCORCHING_FIRE = 106  # Fang / 10609, Vulcan / 10603, Fire Badger / 10620
     IMPACT_DRILL = 107  # Crawler / 10710
     ELITE_MARKSMAN = 108  # Marksman / 10802
-    CHARGED_SHOT = 109
+    CHARGED_SHOT = 109 # Also HE ammo for Stormcaller.
     # Now these just get weird ..., "the 110-series"
     OIL_BOMB = 110  # Phantom ray / 11025
     ROCKET_PUNCH = 1102  # Fortress / 110201
@@ -373,85 +375,136 @@ class UnitTech(NamedEnum):
     ENERGY_DIFFRACTION = 1107  # Melting point / 1107 (Sic!)
     OVERLORD_ARTILLERY = 1108  # Overlord / 1108
     WHIRLWIND = 1109  # Rhino / 1109
-    STICKY_OIL_BOMB = 11010  # Vulcan / 11010
+    MECHANICAL_RAGE = 3022
+    LAUNCHER_OVERLOAD = 10317
+    STICKY_OIL_BOMB = 11010  # Vulcan / 11010a
+    MULTI_CONTROL = 11014
+    HOMING_MISSILE = 11022
+    INCENDIARY_BOMB = 11028
+    DARK_COMPANION = 12029
+    ACID_ATTACK = 180519  # Scorpion / 180519
     FLOATING_ARTILLERY_ARRAY = 110181  # Wraith / 110118
     SECONDARY_ARMAMENT = 110211  # Sabertooth / 110211
+    FORK = 110271 # Raiden / 110271
     SWARM_MISSILES = 110291  # Abyss / 110291 -- wtf is that trailing 1
+    EXTENDED_RANGE_AMMO = 1032002
+    GUN_LAUNCHED_MISSILE = 11020021  # Mountain / 11020021
+    XXX_DEATH_KNELL_LAST_ONE = 11020012 # Death knell / 11020012
     # The 18-series
     REPLICATE = 1801  # Crawler / 180110
     IGNITE = 1802  # Fang / 180209
     PHOTON_EMISSION = 1803  # Overlord / 180311
-    SUPPRESSION_SHOTS = 1804  # Void Eye / 180430
+    SUPPRESSION = 1804  # Void Eye "Suppression shots" / 180430, Wraith "Suppression beam" 180418
     SCANNING_RADAR = 1805  # Farseer / 180526
+    EMP_ARMOR = 180530
 
-    @classmethod
-    def parse(cls, id_: str, chosen_unit):
+@dataclasses.dataclass
+class Tech:
+    unit: Unit
+    tech: UnitTech
+
+    @staticmethod
+    def parse(id_: str, chosen_unit=None):
         match id_:
-            case '3003':  # !?
-                tech = cls.ARMOR_ENHANCEMENT
-                unit = Unit.VULCAN
             case '1105':
-                tech = cls.ANTI_AIR_BARRAGE
+                tech = UnitTech.ANTI_AIR_BARRAGE
                 unit = Unit.FORTRESS
             case '1001':
-                tech = cls.BARRIER
+                tech = UnitTech.BARRIER
                 unit = Unit.FORTRESS
             case '905':
-                tech = cls.FIELD_MAINTENANCE
+                tech = UnitTech.FIELD_MAINTENANCE
                 unit = Unit.RHINO
             case '921':
                 raise ValueError(id_)
             case '1106':
-                tech = cls.ELECTROMAGNETIC_BARRAGE
+                tech = UnitTech.ELECTROMAGNETIC_BARRAGE
                 unit = Unit.MELTING_POINT
             case '1107':
-                tech = cls.ENERGY_DIFFRACTION
+                tech = UnitTech.ENERGY_DIFFRACTION
                 unit = Unit.MELTING_POINT
             case '1108':
-                tech = cls.OVERLORD_ARTILLERY
+                tech = UnitTech.OVERLORD_ARTILLERY
                 unit = Unit.OVERLORD
             case '1109':
-                tech = cls.WHIRLWIND
+                tech = UnitTech.WHIRLWIND
                 unit = Unit.RHINO
             case '1204':
-                tech = cls.CRAWLER_PRODUCTION
+                tech = UnitTech.CRAWLER_PRODUCTION
                 unit = Unit.MELTING_POINT
+            case '3022':
+                tech = UnitTech.MECHANICAL_RAGE
+                unit = Unit.TYPHOON
+            case '10317':
+                tech = UnitTech.LAUNCHER_OVERLOAD
+                unit = Unit.WAR_FACTORY
             case '11010':
-                tech = cls.STICKY_OIL_BOMB
+                tech = UnitTech.STICKY_OIL_BOMB
                 unit = Unit.VULCAN
+            case '11014':
+                tech = UnitTech.MULTI_CONTROL
+                unit = Unit.HACKER
+            case '11022':
+                tech = UnitTech.HOMING_MISSILE
+                unit = Unit.TYPHOON
+            case '11028':
+                tech = UnitTech.INCENDIARY_BOMB
+                unit = Unit.HOUND
+            case '12029':
+                tech = UnitTech.DARK_COMPANION
+                unit = Unit.ABYSS
+            case '180519':
+                tech = UnitTech.ACID_ATTACK
+                unit = Unit.SCORPION
             case '32001':  # Death knell techs shared with Melting Point
-                tech = cls(int(id_[:-4]))
+                tech = UnitTech(int(id_[:-4]))
                 unit = Unit.DEATH_KNELL
             case '110181':
-                tech = cls.FLOATING_ARTILLERY_ARRAY
+                tech = UnitTech.FLOATING_ARTILLERY_ARRAY
                 unit = Unit.WRAITH
             case '110211':
-                tech = cls.SECONDARY_ARMAMENT
+                tech = UnitTech.SECONDARY_ARMAMENT
                 unit = Unit.SABERTOOTH
+            case '110271':
+                tech = UnitTech.FORK
+                unit = Unit.RAIDEN
             case '110291':
-                tech = cls.SWARM_MISSILES
+                tech = UnitTech.SWARM_MISSILES
                 unit = Unit.ABYSS
+            case '180530':
+                tech = UnitTech.EMP_ARMOR
+                unit = Unit.VOID_EYE
             case '1022001' | '1022002':  # Range for ;ountain and Death Knell
-                tech = cls.RANGE
+                tech = UnitTech.RANGE
                 unit = Unit(int(id_[-4:]))
+            case '1032002':
+                tech = UnitTech.EXTENDED_RANGE_AMMO
+                unit = Unit.MOUNTAIN
             case '1102001':
-                tech = cls.ENERGY_DIFFRACTION
+                tech = UnitTech.ENERGY_DIFFRACTION
                 unit = Unit.DEATH_KNELL
             case '1202001':
-                tech = cls.STEEL_BALL_PRODUCTION
+                tech = UnitTech.STEEL_BALL_PRODUCTION
                 unit = Unit.DEATH_KNELL
+            case '11020012':
+                tech = UnitTech.XXX_DEATH_KNELL_LAST_ONE
+                unit = Unit.DEATH_KNELL
+            case '11020021':
+                tech = UnitTech.GUN_LAUNCHED_MISSILE
+                unit = Unit.MOUNTAIN
             case '11020022' | '10102':  # 10102 dubious.
-                tech = cls.INVALID
+                tech = UnitTech.INVALID
                 unit = Unit.DEPRECATED
             case _:
                 if len(id_) > 4 and id_.endswith(('2001', '2002')):
                     unit_id_len = 4
                 else:
                     unit_id_len = 2
-                tech = cls(int(id_[:-unit_id_len]))
+                tech = UnitTech(int(id_[:-unit_id_len]))
                 unit = Unit(int(id_[-unit_id_len:]))
-        assert unit == -1 or chosen_unit == unit, id_
-        return tech, unit
+        if chosen_unit is not None:
+            assert unit == -1 or chosen_unit == unit, id_
+        return Tech(unit=unit, tech=tech)
 
 
 class CommanderSkill(NamedEnum):

@@ -17,7 +17,8 @@ import requests
 
 from mechaparabellum.match_data import Rank, \
     Result
-from mechaparabellum.units import Unit
+from mechaparabellum.units import Tech, \
+    Unit
 
 AUTHOR = 'kimvais'
 APP_NAME = 'mechaparabellum'
@@ -35,6 +36,9 @@ SAVE_GAME_NAME_RE = re.compile('^(?P<version>\d+)_(?P<match_id>.+)_\[.*]VS\[.*]\
 COMBAT_RECORD_RE = re.compile(
     r'^\[Info]\[\d\d:\d\d:\d\d \d{4}/\d\d/\d\d \+\d\d:\d\d] recv message \[\d+] - \[ResponseFPDetail]\n^(?P<json>.+)$',
     re.MULTILINE,
+)
+CARD_DATA_RE = re.compile(r'^\[Info]\[\d\d:\d\d:\d\d \d{4}/\d\d/\d\d \+\d\d:\d\d] recv message \[\d+] - \[ResponseCardsInfo]\n^(?P<json>.+)$',
+    re.MULTILINE
 )
 
 
@@ -86,6 +90,27 @@ class CLI:
             except KeyError:
                 continue
         raise KeyError(k)
+
+    def _find_techs(self):
+        log_files = LOG_DIRECTORY.glob('?Auto*.txt')
+        for log_file in sorted(log_files, key=lambda f: f.stat().st_mtime, reverse=True):
+            text = log_file.read_text()
+            for match in CARD_DATA_RE.finditer(text):
+                if match:
+                    return json.loads(match.group('json'))[0]
+
+    def techs(self):
+        techs = self._find_techs()
+        self.console.print(techs)
+        for card in techs['cards']:
+                self.console.print(Unit(card['id']))
+                for tech_id in card['tech']:
+                    try:
+                        tech = Tech.parse(str(tech_id))
+                    except ValueError:
+                        self.console.print(card)
+                        raise
+                    self.console.print(tech_id, tech)
 
     def _parse_logs(self):
         results = {}

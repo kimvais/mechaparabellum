@@ -193,7 +193,7 @@ class CLI:
         units = round.xpath('playerData/units')
         # ... NewUnitData : id, Index, RoundCount, Exp, Level, Position/x, Position/y, EquipmentID, IsRotate, SellSupply
         specialist = round.xpath('playerData/officers')
-        unit_count = round.xpath('playerData/unitIndex')
+        # unit_count = round.xpath('playerData/unitIndex')
         # playerData:
         # preRoundFightResult "Lose" / "Win"
         # commanderSkills
@@ -223,7 +223,7 @@ class CLI:
             specialists=[Specialist(int(elem.find('int').text)) for elem in specialist if elem.text is not None],
             unlocked_units=[
                 Unit(int(elem.text))
-                            for elem
+                        for elem
                             in unlocked_units
             ],
             actions=actions,
