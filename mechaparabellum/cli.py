@@ -124,6 +124,7 @@ class CLI:
                 tech = Tech.parse(str(tech_id))
                 all_techs[tech.unit].append(tech.tech)
             except InvalidUnit:
+                unknowns.append(str(tech_id))
                 unknown_units.add(str(tech_id)[-2:])
             except InvalidTech:
                 unknowns.append(str(tech_id))
