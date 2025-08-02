@@ -12,6 +12,7 @@ from rich.console import Console
 
 from mechaparabellum.actions import ChooseAdvanceTeam, \
     actions
+from mechaparabellum.round import PlayerRound
 from mechaparabellum.units import (
     CommanderSkill,
     Contraption,
@@ -179,21 +180,23 @@ class CLI:
         #   - id, techs[]/tech[data]
         round_records = player_record.find('playerRoundRecords')
         for round in round_records:
-            for action in self._parse_round(path, round):
-                if self.debug:
-                    self.output(action)
+            player_round = self._parse_round(path, round)
+            if self.debug:
+                self.output(player_round)
+
+    def _parse_int(self, elem):
+        return int(elem[0].text)
 
     def _parse_round(self, path, round):
         round_no = int(round.find('round').text)
         if round_no == 1:
             self._debug_data[self._debug_data['team']] = []
-        self.output(f'\n\n --- Round: {round_no}')
         unlocked_units = round.xpath('playerData/shop/unlockedUnits/int')
         hp = round.xpath('playerData/reactorCore')
         supply = round.xpath('playerData/supply')
         units = round.xpath('playerData/units')
         # ... NewUnitData : id, Index, RoundCount, Exp, Level, Position/x, Position/y, EquipmentID, IsRotate, SellSupply
-        specialist = round.xpath('playerData/officers[0]')
+        specialist = round.xpath('playerData/officers')
         unit_count = round.xpath('playerData/unitIndex')
         # playerData:
         # preRoundFightResult "Lose" / "Win"
@@ -206,13 +209,29 @@ class CLI:
         # energyTowerSkills
         # towerStrengthLevels 0,1
         # isSpecialSupply (bool)
-        actions = round.xpath('actionRecords/MatchActionData')
-        self.output('Available units:')
         for unit in unlocked_units:
             unit = Unit(int(unit.text))
             if round_no == 1:
                 self._debug_data[self._debug_data['team']].append(unit)
-            self.output(f' - {unit}')
+        actions = list(self._parse_actions(round.xpath('actionRecords/MatchActionData')))
+        if isinstance(actions[0], ChooseAdvanceTeam):
+            self._debug_data['team'] = actions[0].uid
+        return PlayerRound(
+            number=round_no,
+            player=PLAYER,
+            supply=self._parse_int(supply),
+            health=self._parse_int(hp),
+            specialists=[Specialist(int(elem.find('int').text)) for elem in specialist if elem.text is not None],
+            unlocked_units=[
+                Unit(int(elem.text))
+                            for elem
+                            in unlocked_units
+            ],
+            actions=actions,
+        )
+
+
+    def _parse_actions(self, actions):
         for action in actions:
             try:
                 yield from self._parse_action(action)
@@ -222,7 +241,6 @@ class CLI:
             except ValueError as e:
                 logging.exception(e)
                 self.output(to_str(action))
-                self.output(f'{path.stem} on round # {round_no}')
                 sys.exit(1)
 
     def _parse_action(self, xml_action_elem):
@@ -233,11 +251,7 @@ class CLI:
             self.output(to_str(xml_action_elem))
             raise Exception(f'Unknown action: {xml_action_elem}')
 
-        actions_ = cls.parse(xml_action_elem)
-        if cls == ChooseAdvanceTeam:
-            actions_ = list(actions_)
-            self._debug_data['team'] = actions_[0].uid
-        yield from actions_
+        yield from cls.parse(xml_action_elem)
 
     def parse_all(self):
         for n, path in enumerate(sorted(DIR.glob('*.grbr'), key=modification_time, reverse=True), 1):

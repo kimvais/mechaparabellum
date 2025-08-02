@@ -23,6 +23,15 @@ class Action(abc.ABC):
     def __str__(self):
         return self.__class__.__name__
 
+    def as_dict(self):
+        ret = dataclasses.asdict(self)
+        ret['action'] = self.action_name
+
+    @property
+    def action_name(self):
+        return self.__class__.__name__
+
+
 @action_dataclass
 class _UnitAction(Action):
     unit: Unit
