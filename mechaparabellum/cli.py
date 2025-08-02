@@ -32,7 +32,10 @@ LOG_DIRECTORY = pathlib.Path(r'C:\Program Files (x86)\steam\steamapps\common\Mec
 # [{ "record": { "time": 1753826266, "eloPoint": -13, "mapId": 2021, "season": 4, "lobby": { "players": [ { "userid": "281474976710805718", "riskInfo": { "name": "JabaMaya", "faceUrl": "https://avatars.steamstatic.com/6a1f82166bffee647a9764f3f94cd6b26064b0d6_full.jpg", "blockName": { "1": false, "2": false, "3": false }, "blockFace": { "1": false, "2": false, "3": false } }, "index": 1 }, { "userid": "281474976710764850", "riskInfo": { "name": "Μ.Ξ.Ğ.Λ.Τ.Ř.Ø.Ņ.", "faceUrl": "https://avatars.steamstatic.com/f31c25ab959fc993b93f92bd2abcb80f4e482c82_full.jpg", "blockName": { "1": false, "2": false, "3": false }, "blockFace": { "1": false, "2": false, "3": false } } }, { "userid": "281474976711266755", "riskInfo": { "name": "Kalmere", "faceUrl": "https://avatars.steamstatic.com/fdd8590c4e2fb20011a0e762f3868729bffa8be2_full.jpg", "blockName": { "1": false, "2": false, "3": false }, "blockFace": { "1": false, "2": false, "3": false } }, "index": 2 } ], "win": -1, "index": 3 } } }]
 GAME_RESULT_RE = re.compile(r'^\[Info]\[.*] recv message \[-?\d+] - \[PushAddFpHistory]\n^(?P<json>.+)$', re.MULTILINE)
 SAVE_GAME_NAME_RE = re.compile('^(?P<version>\d+)_(?P<match_id>.+)_\[.*]VS\[.*]\.grbr')
-COMBAT_RECORD_RE = re.compile(r'^\[Info]\[\d\d:\d\d:\d\d \d{4}/\d\d/\d\d \+\d\d:\d\d] recv message \[\d+] - \[ResponseFPDetail]\n^(?P<json>.+)$', re.MULTILINE)
+COMBAT_RECORD_RE = re.compile(
+    r'^\[Info]\[\d\d:\d\d:\d\d \d{4}/\d\d/\d\d \+\d\d:\d\d] recv message \[\d+] - \[ResponseFPDetail]\n^(?P<json>.+)$',
+    re.MULTILINE,
+)
 
 
 # Combat record!
@@ -42,7 +45,7 @@ COMBAT_RECORD_RE = re.compile(r'^\[Info]\[\d\d:\d\d:\d\d \d{4}/\d\d/\d\d \+\d\d:
 # Game Over
 """[C] recv message [-30] - [PushGameOver]"""
 # Round damage:
-"[C] [5] team 0, reduce score 3496, current : -46 / 6600^M"
+'[C] [5] team 0, reduce score 3496, current : -46 / 6600^M'
 
 # MRR update:
 """[Info][13:40:44 2025/07/31 +03:00] recv message [-147] - [PushEloChange]^M
@@ -51,6 +54,7 @@ COMBAT_RECORD_RE = re.compile(r'^\[Info]\[\d\d:\d\d:\d\d \d{4}/\d\d/\d\d \+\d\d:
 logger = logging.getLogger(__name__)
 
 DATA_DIR = pathlib.Path(platformdirs.user_data_dir(APP_NAME, AUTHOR, ensure_exists=True))
+
 
 class Result(enum.IntEnum):
     LOSS = -1
@@ -65,6 +69,7 @@ class Result(enum.IntEnum):
         else:
             return 'n/a'
 
+
 class Rank(enum.IntEnum):
     WINNER = 1
     RUNNER_UP = 2
@@ -73,6 +78,7 @@ class Rank(enum.IntEnum):
 
     def __rich__(self):
         return self.name.title()
+
 
 class CLI:
     def __init__(self):
@@ -132,7 +138,10 @@ class CLI:
                             except KeyError:
                                 outcome = Result(math.copysign(1, mrr_change) if mrr_change else 0)
                         ts = fight['time']
-                        players = {pl.get('index', 0): {'id_': pl['userid'], 'name': pl['riskInfo']['name']} for pl in player_data['players']}
+                        players = {
+                            pl.get('index', 0): {'id_': pl['userid'], 'name': pl['riskInfo']['name']}
+                            for pl in player_data['players']
+                        }
                         # self.console.print(datetime.datetime.fromtimestamp(ts).isoformat(), outcome.name, seat, players)
                         results[ts] = {
                             'season': season,
@@ -141,7 +150,7 @@ class CLI:
                             'seat': seat,
                             'players': players,
                             'combat_power': points,
-                            'mrr_change': mrr_change
+                            'mrr_change': mrr_change,
                         }
                     except KeyError:
                         self.console.print(fight)
@@ -163,6 +172,7 @@ class CLI:
             result['timestamp'] = ts
             with (DATA_DIR / f'match_result_{ts}.json').open('w') as f:
                 json.dump(result, f)
+
             def _get_playernames():
                 players = result['players']
                 if result['map_id'] > 3999:
@@ -181,6 +191,7 @@ class CLI:
                             playername = ''
                     name = f'[{colors[idx]}]{playername}[/{colors[idx]}]'
                     yield name
+
             table.add_row(
                 str(result['season']),
                 datetime.datetime.fromtimestamp(ts).isoformat(),

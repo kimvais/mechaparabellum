@@ -25,6 +25,7 @@ CONFIRMED_UNIT_REINFORCEMENTS = (
 
 DEDUCED_UNIT_REINFORCEMENTS = {201, 203, 204, 206, 207, 209, 210, 212}
 
+
 class NamedEnum(enum.IntEnum):
     def __str__(self):
         return self.name.replace('_', ' ').title()
@@ -264,8 +265,7 @@ class TowerTech(NamedEnum):
 
 
 class Specialist(NamedEnum):
-    """
-    """
+    """ """
 
     _NONE = -1
     SUPPLY = 10002
@@ -290,11 +290,12 @@ class Specialist(NamedEnum):
 
     def __str__(self):
         if self.name.startswith('_'):
-            return "None"
+            return 'None'
         else:
             return f'{self.name.replace("_", " ").title()} Specialist'
 
     __rich__ = __str__
+
 
 class Tower(NamedEnum):
     RESEARCH_CENTER = 0
