@@ -27,6 +27,13 @@ CONFIRMED_UNIT_REINFORCEMENTS = (
 
 DEDUCED_UNIT_REINFORCEMENTS = {201, 203, 204, 206, 207, 209, 210, 212}
 
+class InvalidUnit(ValueError):
+    ...
+
+
+class InvalidTech(ValueError):
+    ...
+
 
 class NamedEnum(enum.IntEnum):
     def __str__(self):
@@ -340,7 +347,7 @@ class UnitTech(NamedEnum):
     FORTIFIED_TARGET_LOCK = 24  # Steel Ball / 2408
     POWER_ARMOR = 25  # Rhino / 2305
     SUBTERRANEAN_BLITZ = 26  # Crawler / 2610
-    # 27 ???
+    ACIDIC_EXPLOSION = 27
     FINAL_BLITZ = 28  # Rhino / 2808
     QUANTUM_REASSEMBLY = 29  # Phoenix / 2916
     ARMOR_ENHANCEMENT = 30
@@ -349,12 +356,12 @@ class UnitTech(NamedEnum):
     ANTI_MISSILE = 33  # Mustang / 3307
     EFFICIENT_MAINTENANCE = 34  # Mountain / 342002
     LOOSE_FORMATION = 35  # Crawler / 3510
-    # 36 ???
+    LARVA_REPLICATE = 36  # Sandworm / 3623
     SANDSTORM = 37  # Sandworm / 3723
     STRIKE = 38  # Sandworm / 3823
     STEALTH_CLOAK = 39  # Phantom Ray / 3925
     CHAIN = 40  # Raiden / 4027
-    # 41 ???
+    IONIZATION = 41
     FIRE_EXTINGUISHER = 42  # Hound / 4228
     # 43 ???
     AERIAL_MODE = 44  # Void Eye / 4430
@@ -362,7 +369,7 @@ class UnitTech(NamedEnum):
     # 101 ???
     RANGE = 102  # Fire badger / 10220, Mustang / 10207, Sniper / 10202, Sabertooth / 10221, Phantom Ray / 10225
     FIELD_MAINTENANCE_SABER = 103  # Sabertooth / 10321
-    # 104 ???
+    # 104 ??? - Marksman
     MECHANICAL_RAGE_CRAWLER = 105  # Crawler / 10510
     ARMOR_PIERCING_BULLETS_OR_SCORCHING_FIRE = 106  # Fang / 10609, Vulcan / 10603, Fire Badger / 10620
     IMPACT_DRILL = 107  # Crawler / 10710
@@ -397,6 +404,12 @@ class UnitTech(NamedEnum):
     SUPPRESSION = 1804  # Void Eye "Suppression shots" / 180430, Wraith "Suppression beam" 180418
     SCANNING_RADAR = 1805  # Farseer / 180526
     EMP_ARMOR = 180530
+    # Found in "unlocked" but not in game:
+    XXX_1045 = 1045
+    XXX_1205 = 1205
+    XXX_1206 = 1206
+    XXX_1207 = 1207
+
 
 @dataclasses.dataclass
 class Tech:
@@ -500,8 +513,16 @@ class Tech:
                     unit_id_len = 4
                 else:
                     unit_id_len = 2
-                tech = UnitTech(int(id_[:-unit_id_len]))
-                unit = Unit(int(id_[-unit_id_len:]))
+                tech_id = int(id_[:-unit_id_len])
+                unit_id = int(id_[-unit_id_len:])
+                try:
+                    tech = UnitTech(tech_id)
+                except ValueError as e:
+                    raise InvalidTech(tech_id) from e
+                try:
+                    unit = Unit(unit_id)
+                except ValueError as e:
+                    raise InvalidUnit(unit_id) from e
         if chosen_unit is not None:
             assert unit == -1 or chosen_unit == unit, id_
         return Tech(unit=unit, tech=tech)

@@ -17,7 +17,9 @@ import requests
 
 from mechaparabellum.match_data import Rank, \
     Result
-from mechaparabellum.units import Tech, \
+from mechaparabellum.units import InvalidTech, \
+    InvalidUnit, \
+    Tech, \
     Unit
 
 AUTHOR = 'kimvais'
@@ -111,6 +113,29 @@ class CLI:
                         self.console.print(card)
                         raise
                     self.console.print(tech_id, tech)
+
+    def unlocked_techs(self):
+        all_techs = defaultdict(list)
+        unknowns = []
+        unknown_units = set()
+        techs = self._find_techs()
+        for tech_id in techs['unlockedTechnologies']:
+            try:
+                tech = Tech.parse(str(tech_id))
+                all_techs[tech.unit].append(tech.tech)
+            except InvalidUnit:
+                unknown_units.add(str(tech_id)[-2:])
+            except InvalidTech:
+                unknowns.append(str(tech_id))
+                continue
+        for unit, teched in all_techs.items():
+            self.console.print(f'\n\t{unit}')
+            self.console.print(teched)
+            candidates = [t for t in unknowns if t.endswith(f'{unit.value:02d}')]
+            if candidates:
+                self.console.print(sorted(candidates))
+
+        self.console.print(sorted(unknown_units))
 
     def _parse_logs(self):
         results = {}
