@@ -3,18 +3,6 @@ import dataclasses
 import enum
 
 
-"""
-    18: {1},
-    26: {1},
-    19: {1},
-    3: {1},
-    14: {1},
-    22: {1},
-    11: {1},
-    1: {1}
-
-"""
-
 CONFIRMED_UNIT_REINFORCEMENTS_FOR_1V1_AND_2V2 = {101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112}
 CONFIRMED_UNIT_REINFORCEMENTS_FOR_BRAWL = {202, 205, 208}
 CONFIRMED_UNIT_REINFORCEMENTS_FOR_SURVIVAL = {302, 303, 304, 305, 306, 307, 308, 309, 310}
@@ -579,30 +567,31 @@ class Contraption(NamedEnum):
     SENTRY_MISSILE = 20001  # ?
     MISSILE_INTERCEPTOR = 30001  # ?
 
-starting_units = {
-    9902: (Unit.SABERTOOTH, Unit.HOUND),
-    9894: (Unit.SABERTOOTH, Unit.ARCLIGHT),
+
+STARTING_UNITS = {
     9871: (Unit.MARKSMAN, Unit.SLEDGEHAMMER),
-    9893: (Unit.SABERTOOTH, Unit.FANG),
-    9897: (Unit.HOUND, Unit.STEEL_BALL),
-    9889: (Unit.TARANTULA, Unit.MARKSMAN),
     9873: (Unit.MUSTANG, Unit.CRAWLER),
     9874: (Unit.STEEL_BALL, Unit.FANG),
-    9900: (Unit.VOID_EYE, Unit.MUSTANG),
-    9877: (Unit.FANG, Unit.SLEDGEHAMMER),
-    9891: (Unit.TARANTULA, Unit.CRAWLER),
-    9883: (Unit.ARCLIGHT, Unit.STEEL_BALL),
-    9885: (Unit.ARCLIGHT, Unit.SLEDGEHAMMER),
-    9876: (Unit.FANG, Unit.STORMCALLER),
     9875: (Unit.STEEL_BALL, Unit.CRAWLER),
-    9899: (Unit.VOID_EYE, Unit.SLEDGEHAMMER),
-    9896: (Unit.HOUND, Unit.MUSTANG),
-    9892: (Unit.SABERTOOTH, Unit.CRAWLER),
-    9901: (Unit.VOID_EYE, Unit.TARANTULA),
-    9884: (Unit.ARCLIGHT, Unit.STORMCALLER),
+    9876: (Unit.FANG, Unit.STORMCALLER),
+    9877: (Unit.FANG, Unit.SLEDGEHAMMER),
     9878: (Unit.CRAWLER, Unit.STORMCALLER),
     9879: (Unit.CRAWLER, Unit.SLEDGEHAMMER),
+    9883: (Unit.ARCLIGHT, Unit.STEEL_BALL),
+    9884: (Unit.ARCLIGHT, Unit.STORMCALLER),
+    9885: (Unit.ARCLIGHT, Unit.SLEDGEHAMMER),
+    9889: (Unit.TARANTULA, Unit.MARKSMAN),
     9890: (Unit.TARANTULA, Unit.FANG),
+    9891: (Unit.TARANTULA, Unit.CRAWLER),
+    9892: (Unit.SABERTOOTH, Unit.CRAWLER),
+    9893: (Unit.SABERTOOTH, Unit.FANG),
+    9894: (Unit.SABERTOOTH, Unit.ARCLIGHT),
+    9895: (Unit.HOUND, Unit.SLEDGEHAMMER),
+    9896: (Unit.HOUND, Unit.MUSTANG),
+    9897: (Unit.HOUND, Unit.STEEL_BALL),
     9898: (Unit.HOUND, Unit.STORMCALLER),
-    9895: (Unit.HOUND, Unit.SLEDGEHAMMER)
+    9899: (Unit.VOID_EYE, Unit.SLEDGEHAMMER),
+    9900: (Unit.VOID_EYE, Unit.MUSTANG),
+    9901: (Unit.VOID_EYE, Unit.TARANTULA),
+    9902: (Unit.SABERTOOTH, Unit.HOUND),
 }

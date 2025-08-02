@@ -6,7 +6,7 @@ Tools for [Mechabellum](https://store.steampowered.com/app/669330/Mechabellum/)
 > These tools are work-in-progress and documentation exists only for subset of commands. Use them at your own risk.
 
 > [!TIP]
-> You __MUST__ go to "Settings" -> "Other" and :white_check_markcheck: `Automatically save replays` _and_ at least periodically go 
+> You __MUST__ go to "Settings" -> "Other" and :white_check_mark: `Automatically save replays` _and_ at least periodically go 
 > "Collection" -> "Combat record" in order for these tools to do anything useful.
 
 ## Installation
@@ -22,5 +22,8 @@ In Powershell:
 5. `uv pip install .`
 
 ## Features
-- Replay parsing, try `python -m mechaparabellum.replay parse_all`
-- Log parsing, try `python -m mechaparabellum.cli parse`
+- Combat record display, try `mechaparabellum combat_record`
+- Replay parsing, try `mechaparabellum.replay parse_all`
+
+>[!TIP]
+> Just do `mechaparabellum` without any arguments to see all the available features, including the ones in development.

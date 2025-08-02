@@ -81,9 +81,9 @@ class BattleInfo:
 
 
 class CLI:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, console=None):
         self.debug = debug
-        self.console = Console()
+        self.console = console if console is not None else Console()
         self.buffer = []
         self._debug_data = {}
 
