@@ -1,4 +1,3 @@
-import enum
 import logging
 import math
 import pathlib
@@ -16,7 +15,8 @@ import rich.table
 import fire
 import requests
 
-from mechaparabellum.utils import get_newest
+from mechaparabellum.match_data import Rank, \
+    Result
 from mechaparabellum.units import Unit
 
 AUTHOR = 'kimvais'
@@ -54,30 +54,6 @@ COMBAT_RECORD_RE = re.compile(
 logger = logging.getLogger(__name__)
 
 DATA_DIR = pathlib.Path(platformdirs.user_data_dir(APP_NAME, AUTHOR, ensure_exists=True))
-
-
-class Result(enum.IntEnum):
-    LOSS = -1
-    UNKNOWN = 0
-    WIN = 1
-
-    def __rich__(self):
-        if self.value == Result.LOSS:
-            return '[red]Loss[/red]'
-        elif self.value == Result.WIN:
-            return '[green]Win[/green]'
-        else:
-            return 'n/a'
-
-
-class Rank(enum.IntEnum):
-    WINNER = 1
-    RUNNER_UP = 2
-    THIRD = 3
-    FOURTH = 4
-
-    def __rich__(self):
-        return self.name.title()
 
 
 class CLI:

@@ -12,17 +12,11 @@ from rich.console import Console
 
 from mechaparabellum.actions import ChooseAdvanceTeam, \
     actions
-from mechaparabellum.round import PlayerRound
+from mechaparabellum.match_data import Player, \
+    PlayerRound
 from mechaparabellum.units import (
-    CommanderSkill,
-    Contraption,
-    Item,
-    Reinforcement,
     Specialist,
-    Tower,
-    TowerTech,
     Unit,
-    UnitTech,
 )
 from mechaparabellum.utils import modification_time, to_str
 
@@ -142,7 +136,9 @@ class CLI:
             return
         else:
             player_name = player_record.find('name').text
-            assert player_name == PLAYER
+            player_id = int(player_record.find('id').text)
+            player = Player(id_=player_id, name=player_name, seat=seat)
+            assert player.name == PLAYER
         # reinforceItems
         # Version
         # Seat
@@ -180,14 +176,14 @@ class CLI:
         #   - id, techs[]/tech[data]
         round_records = player_record.find('playerRoundRecords')
         for round in round_records:
-            player_round = self._parse_round(path, round)
+            player_round = self._parse_round(player, round)
             if self.debug:
                 self.output(player_round)
 
     def _parse_int(self, elem):
         return int(elem[0].text)
 
-    def _parse_round(self, path, round):
+    def _parse_round(self, player, round):
         round_no = int(round.find('round').text)
         if round_no == 1:
             self._debug_data[self._debug_data['team']] = []
@@ -214,11 +210,14 @@ class CLI:
             if round_no == 1:
                 self._debug_data[self._debug_data['team']].append(unit)
         actions = list(self._parse_actions(round.xpath('actionRecords/MatchActionData')))
-        if isinstance(actions[0], ChooseAdvanceTeam):
-            self._debug_data['team'] = actions[0].uid
+        try:
+            if isinstance(actions[0], ChooseAdvanceTeam):
+                self._debug_data['team'] = actions[0].uid
+        except IndexError:
+            pass  # No rounds detected.
         return PlayerRound(
             number=round_no,
-            player=PLAYER,
+            player=player,
             supply=self._parse_int(supply),
             health=self._parse_int(hp),
             specialists=[Specialist(int(elem.find('int').text)) for elem in specialist if elem.text is not None],
@@ -257,7 +256,8 @@ class CLI:
         for n, path in enumerate(sorted(DIR.glob('*.grbr'), key=modification_time, reverse=True), 1):
             self.output(f'Parsing #{n} {path.name}')
             self.parse(path)
-        self.output(self._debug_data)
+        if self.debug:
+            self.output(self._debug_data)
 
 
 if __name__ == '__main__':
