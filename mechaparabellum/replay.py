@@ -10,6 +10,7 @@ import tempfile
 
 from rich.console import Console
 
+from mechaparabellum.actions import actions
 from mechaparabellum.units import (
     CommanderSkill,
     Contraption,
@@ -175,7 +176,8 @@ class CLI:
         #   - id, techs[]/tech[data]
         round_records = player_record.find('playerRoundRecords')
         for round in round_records:
-            self._parse_round(path, round)
+            for action in self._parse_round(path, round):
+                self.output(action)
 
     def _parse_round(self, path, round):
         round_no = round.find('round').text
@@ -203,7 +205,7 @@ class CLI:
             self.output(f' Available: {Unit(int(unit.text))}')
         for action in actions:
             try:
-                self._parse_action(action)
+                yield from self._parse_action(action)
             except AttributeError as e:
                 logging.exception(e)
                 self.output(to_str(action))
@@ -213,84 +215,14 @@ class CLI:
                 self.output(f'{path.stem} on round # {round_no}')
                 sys.exit(1)
 
-    def _parse_action(self, action):
-        act_name = action.attrib.values()[0]
-        match act_name:
-            case 'PAD_ChooseAdvanceTeam':
-                uid = action.find('ID').text
-                idx = action.find('Index').text
-                self.output(f'Choose starting setup: #{idx}: {uid}')
-            case 'PAD_UpgradeTechnology':
-                unit = get_unit(action)
-                tech, teched_unit = UnitTech.parse(action.find('TechID').text, unit)
-                assert teched_unit in {Unit.DEPRECATED, unit}, (
-                    tech,
-                    unit,
-                    to_str(action),
-                )
-                self.output(f'Upgrade technology: {unit} {unit.value} - {tech} {tech.value}')
-            case 'PAD_ActiveEnergyTowerSkill':
-                skill = TowerTech(int(action.find('SkillID').text))
-                self.output(f'Active energy tower skill: {skill}')
-            case 'PAD_BuyUnit':
-                uid = get_unit(action)
-                self.output(f'Buy unit: {uid}')
-            case 'PAD_UnlockUnit':
-                uid = get_unit(action)
-                self.output(f'Unlock unit: {uid}')
-            case 'PAD_UpgradeUnit':
-                uid = get_unit(action)
-                idx = action.find('UIDX').text
-                self.output(f'Upgrade unit: {uid} #{idx}')
-            case 'PAD_FinishDeploy':
-                self.output('Finish deploy')
-            case 'PAD_Undo':
-                self.output('Undo')
-            case 'PAD_ReleaseCommanderSkill':
-                skill_id = int(action.find('ID').text)
-                skill = CommanderSkill(skill_id)
-                index = int(action.find('SkillIndex').text)
-                self.output(f'Release commander skill: {skill}')
-            case 'PAD_MoveUnit':
-                moves = action.xpath('moveUnitDatas/MoveUnitData')
-                for data in moves:
-                    x = data.find('position').find('x').text
-                    y = data.find('position').find('y').text
-                    uid = Unit(int(data.find('unitID').text))
-                    index = data.find('unitIndex').text
-                    self.output(f'Move unit: {uid} #{index} x: {x} y: {y}')
-            case 'PAD_ChooseReinforceItem':
-                idx = action.find('Index').text
-                uid = action.find('ID').text
-                item = Reinforcement.parse(uid)
-                self.output(f'Choose reinforcement: {item} ({idx})')
-            case 'PAD_UseEquipment':
-                uid = action.find('EquipmentID').text
-                item = Item(int(uid))
-                idx = action.find('UnitIndex').text
-                self.output(f'Use equipment: {item} on unit #{idx}')
-            case 'PAD_ActiveBlueprint':
-                uid = action.find('ID').text
-                self.output(f'Activate spell: {uid}')
-            case 'PAD_GiveUp':
-                self.output('Surrender')
-            case 'PAD_ReleaseContraption':
-                uid = int(action.find('ContraptionID').text)
-                item = Contraption(int(uid))
-                self.output(f'Release contraption: {item}')
-            case 'PAD_StrengthenTower':
-                tower_idx = action.find('Index').text
-                tower = Tower(int(tower_idx))
-                self.output(f'Strengthen tower: {tower}')
-            case 'PAD_CancelReleaseCommanderSkill':
-                skill_id = int(action.find('ID').text)
-                skill = CommanderSkill(skill_id)
-                self.output(f'Cancel release commander skill {skill}')
-            case 'PAD_TestCommand':
-                self.output('[red]TESTING GROUNDS ARE NOT SUPPORTED[/red]')
-            case _:
-                self.output(to_str(action))
-                raise Exception(f'Unknown action: {action}')
+    def _parse_action(self, xml_action_elem):
+        act_name = xml_action_elem.attrib.values()[0]
+        try:
+            cls = actions[act_name]
+        except KeyError:
+            self.output(to_str(xml_action_elem))
+            raise Exception(f'Unknown action: {xml_action_elem}')
+        yield from cls.parse(xml_action_elem)
 
     def parse_all(self):
         for n, path in enumerate(sorted(DIR.glob('*.grbr'), key=modification_time, reverse=True), 1):

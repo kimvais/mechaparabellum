@@ -19,13 +19,10 @@ class Action(abc.ABC):
     def parse(self, elem):
         raise NotImplementedError
 
-    def __rich__(self):
-        return self.__str__
-
     def __str__(self):
         return self.__class__.__name__
 
-
+@action_dataclass
 class _UnitAction(Action):
     unit: Unit
 
@@ -52,7 +49,7 @@ class ChooseAdvanceTeam(Action):
 @action_dataclass
 class UpgradeTechnology(Action):
     unit: Unit
-    tech = UnitTech
+    tech: UnitTech
 
     @classmethod
     def parse(cls, elem):
@@ -119,10 +116,7 @@ class Undo(Action):
 class FinishDeploy(Action):
     @classmethod
     def parse(cls, elem):
-        yield (cls)
-
-    def __str__(self):
-        return f'Finish deploy'
+        yield cls()
 
 
 @action_dataclass
@@ -141,7 +135,7 @@ class ReleaseCommanderSkill(Action):
 
 
 @action_dataclass
-class PAD_MoveUnit(Action):
+class MoveUnit(Action):
     unit: Unit
     index: int
     x: int
@@ -162,13 +156,13 @@ class PAD_MoveUnit(Action):
 
 
 @action_dataclass
-class ChooseReinforcement(Action):
+class ChooseReinforceItem(Action):
     item: Reinforcement
     index: int
 
     @classmethod
     def parse(cls, elem):
-        item = Reinforcement(int(elem.find('ID').text))
+        item = Reinforcement.parse(elem.find('ID').text)
         index = int(elem.find('Index').text)
         yield cls(item, index)
 
@@ -192,7 +186,7 @@ class UseEquipment(Action):
 
 
 @action_dataclass
-class ActivateBlueprint(Action):
+class ActiveBlueprint(Action):
     id_: int
 
     @classmethod
@@ -260,3 +254,4 @@ class TestCommand(Action):
 
     def __str__(self):
         return '[red]TESTING GROUNDS ARE NOT SUPPORTED[/red]'
+
